@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{513BE777-DCCE-43A1-A727-F521C570BCFD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SharpMap.Data.Providers.Business.MongoDB</RootNamespace>
+    <AssemblyName>SharpMap.BusinessObjects.MongoDB.Gtfs</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BruTile, Version=0.7.4.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BruTile.0.7.4.4\lib\net40\BruTile.dll</HintPath>
+    </Reference>
+    <Reference Include="BruTile.Desktop, Version=0.7.4.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BruTile.0.7.4.4\lib\net40\BruTile.Desktop.dll</HintPath>
+    </Reference>
+    <Reference Include="BruTile.MbTiles, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BruTile.0.7.4.4\lib\net40\BruTile.MbTiles.dll</HintPath>
+    </Reference>
+    <Reference Include="BruTile.Serialization, Version=0.7.4.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BruTile.0.7.4.4\lib\net40\BruTile.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.2.0.0\lib\2.0\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="GeoAPI, Version=1.7.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeoAPI.1.7.2\lib\net40-client\GeoAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Bson">
+      <HintPath>..\packages\mongocsharpdriver.1.9.1\lib\net35\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=1.9.1.221, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\mongocsharpdriver.1.9.1\lib\net35\MongoDB.Driver.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite, Version=1.13.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetTopologySuite.1.13.2\lib\net40-client\NetTopologySuite.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite.IO.GeoTools, Version=1.13.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetTopologySuite.IO.1.13.2\lib\net40-client\NetTopologySuite.IO.GeoTools.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite.IO.MsSqlSpatial, Version=1.13.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetTopologySuite.IO.1.13.2\lib\net40-client\NetTopologySuite.IO.MsSqlSpatial.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite.IO.PostGis, Version=1.13.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetTopologySuite.IO.1.13.2\lib\net40-client\NetTopologySuite.IO.PostGis.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PowerCollections, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NetTopologySuite.1.13.2\lib\net40-client\PowerCollections.dll</HintPath>
+    </Reference>
+    <Reference Include="ProjNet, Version=1.3.0.3, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ProjNET4GeoAPI.1.3.0.3\lib\net40-client\ProjNet.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpMap, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpMap.1.1.0\lib\net40-client\SharpMap.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.86.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.MSIL.1.0.86.0\lib\net40\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq, Version=1.0.86.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.MSIL.1.0.86.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Gtfs\Agency.cs" />
+    <Compile Include="Gtfs\Calendar.cs" />
+    <Compile Include="Gtfs\CalendarDate.cs" />
+    <Compile Include="Gtfs\ExactTimes.cs" />
+    <Compile Include="Gtfs\FareAttribute.cs" />
+    <Compile Include="Gtfs\FareRule.cs" />
+    <Compile Include="Gtfs\FeedInfo.cs" />
+    <Compile Include="Gtfs\Frequency.cs" />
+    <Compile Include="Gtfs\Import\Associator.cs" />
+    <Compile Include="Gtfs\Import\ImportFromFolder.cs" />
+    <Compile Include="Gtfs\LocationType.cs" />
+    <Compile Include="Gtfs\PaymentMethod.cs" />
+    <Compile Include="Gtfs\Route.cs" />
+    <Compile Include="Gtfs\RouteType.cs" />
+    <Compile Include="Gtfs\Shape.cs" />
+    <Compile Include="Gtfs\Stop.cs" />
+    <Compile Include="Gtfs\StopTime.cs" />
+    <Compile Include="Gtfs\StopType.cs" />
+    <Compile Include="Gtfs\Transfer.cs" />
+    <Compile Include="Gtfs\TransferType.cs" />
+    <Compile Include="Gtfs\Trip.cs" />
+    <Compile Include="Gtfs\Import\UintIdGenerator.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharpMap.BusinessObjects.MongoDB\SharpMap.BusinessObjects.MongoDB.csproj">
+      <Project>{210f7e37-648c-426b-a0c4-101fdcb28362}</Project>
+      <Name>SharpMap.Business.MongoDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj">
+      <Project>{ac492306-4594-4e1e-a7b4-8982937061f8}</Project>
+      <Name>SharpMap.Business</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="x64\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
