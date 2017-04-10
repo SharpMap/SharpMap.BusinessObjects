@@ -6,12 +6,12 @@ using SharpMap.Data.Providers.Business;
 
 namespace SharpMap.Business.Tests.NHibernating
 {
-    public class BusinessObjectRepository<T> : BusinessObjectAccessBase<T>
+    public class BusinessObjectSource<T> : BaseBusinessObjectSource<T>
         where T:class
     {
         private readonly string _title;
 
-        public BusinessObjectRepository()
+        public BusinessObjectSource()
         {
             _title = typeof (T).Name;
         }

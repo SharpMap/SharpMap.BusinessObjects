@@ -7,7 +7,7 @@ using SharpMap.Data.Providers.Business;
 
 namespace SharpMap.Business.Tests.MongoDB
 {
-    public class PoIRepository : MongoDBBusinessObjectRepository<PoI, GeoJson2DCoordinates>
+    public class PoIRepository : MongoDbBusinessObjectSource<PoI, GeoJson2DCoordinates>
     {
         public PoIRepository(GeoJsonConverter<GeoJson2DCoordinates> converter, MongoClientSettings settings, string database, string collection) 
             : base(converter, settings, database, collection)

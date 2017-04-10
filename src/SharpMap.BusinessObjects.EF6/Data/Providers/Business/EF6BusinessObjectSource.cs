@@ -6,37 +6,43 @@ using System.Data.Entity.Spatial;
 using System.Linq;
 using System.Reflection;
 using GeoAPI.Geometries;
-using NetTopologySuite.IO;
 
 namespace SharpMap.Data.Providers.Business
 {
-    public class EF6BusinessObjectRepository
+    /// <summary>
+    /// A utility class to initialize
+    /// </summary>
+    public class EF6BusinessObjectSource
     {
-        private static bool Initialized;
+        private static bool _initialized;
 
         internal static void Configure()
         {
-            if (!Initialized)
+            if (!_initialized)
             {
-                Initialized = true;
+                _initialized = true;
                 try
                 {
-                    //SqlServerTypes.Utilities.LoadNativeAssemblies(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
+                    SqlServerTypes.Utilities.LoadNativeAssemblies(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
                 }
                 catch (Exception ex)
                 {
-                    throw new TypeInitializationException("EF6BusinessObjectRepository", ex);
+                    throw new TypeInitializationException("EF6BusinessObjectSource", ex);
                 }
             }
         }
     }
 
-    public class EF6BusinessObjectRepository<T> : BusinessObjectAccessBase<T>
+    /// <summary>
+    /// A bui
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class EF6BusinessObjectSource<T> : BaseBusinessObjectSource<T>
         where T:class, IEF6SpatialGeometryObject
     {
-        static EF6BusinessObjectRepository()
+        static EF6BusinessObjectSource()
         {
-            EF6BusinessObjectRepository.Configure();
+            EF6BusinessObjectSource.Configure();
         }
 
         private readonly Func<DbContext> _createContext;
@@ -44,7 +50,7 @@ namespace SharpMap.Data.Providers.Business
 
         public DbContext Context { get { return _createContext(); } }
 
-        public EF6BusinessObjectRepository(Func<DbContext> createContext)
+        public EF6BusinessObjectSource(Func<DbContext> createContext)
         {
 
             _createContext = createContext;

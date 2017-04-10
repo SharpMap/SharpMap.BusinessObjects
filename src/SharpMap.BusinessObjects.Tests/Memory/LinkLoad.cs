@@ -197,7 +197,7 @@ namespace SharpMap.Business.Tests.Memory
         [Test]
         public void TestRendering()
         {
-            var s = new InMemoryBusinessObjectAccess<LinkWithLoad>();
+            var s = new InMemoryBusinessObjectSource<LinkWithLoad>();
             s.Insert(_linksWithLoads);
 
             var l = new BusinessObjectLayer<LinkWithLoad>(s);

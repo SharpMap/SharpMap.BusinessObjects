@@ -35,7 +35,7 @@ namespace SharpMap.Business.Tests.NHibernating
         public void TestConstruction()
         {
             IProvider p = null;
-            var source = new BusinessObjectRepository<Country>();
+            var source = new BusinessObjectSource<Country>();
             Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(source));
 
             Assert.AreEqual(source.Count, p.GetFeatureCount());
@@ -45,7 +45,7 @@ namespace SharpMap.Business.Tests.NHibernating
         public void TestGetFeature()
         {
             IProvider p = null;
-            var source = new BusinessObjectRepository<Country>();
+            var source = new BusinessObjectSource<Country>();
             Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(source));
 
             FeatureDataRow row = null;
@@ -67,7 +67,7 @@ namespace SharpMap.Business.Tests.NHibernating
         public void TestGetExtents()
         {
             IProvider p = null;
-            var source = new BusinessObjectRepository<Country>();
+            var source = new BusinessObjectSource<Country>();
             Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(source));
 
             var e = p.GetExtents();
@@ -84,7 +84,7 @@ namespace SharpMap.Business.Tests.NHibernating
         public void TestExecuteFeatureQuery1()
         {
             IProvider p = null;
-            var source = new BusinessObjectRepository<Country>();
+            var source = new BusinessObjectSource<Country>();
             Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(source));
 
             var fds = new FeatureDataSet();
@@ -101,7 +101,7 @@ namespace SharpMap.Business.Tests.NHibernating
         public void TestExecuteFeatureQuery2()
         {
             IProvider p = null;
-            var source = new BusinessObjectRepository<Country>();
+            var source = new BusinessObjectSource<Country>();
             Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(source));
 
             var fds = new FeatureDataSet();
@@ -123,7 +123,7 @@ namespace SharpMap.Business.Tests.NHibernating
                 m.BackColor = Color.White;
 
                 IProvider p = null;
-                var source = new BusinessObjectRepository<Country>();
+                var source = new BusinessObjectSource<Country>();
                 Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(source));
 
                 m.Layers.Add(new VectorLayer("Countries", p));
@@ -132,7 +132,7 @@ namespace SharpMap.Business.Tests.NHibernating
                 ll.LabelStringDelegate = (fdr) => string.Format("{0} - {1}", fdr["PKID"], fdr["Admin"]);
                 ll.PriorityDelegate = (fdr) => (int)fdr.Geometry.Area;
                 ll.MultipartGeometryBehaviour = LabelLayer.MultipartGeometryBehaviourEnum.Largest;
-                ll.LabelFilter = Rendering.LabelCollisionDetection.SimpleCollisionDetection;
+                ll.LabelFilter = Rendering.LabelCollisionDetection.ThoroughCollisionDetection;
 
                 ll.Style.Halo = new Pen(Color.Wheat, 2f) { LineJoin = LineJoin.MiterClipped };
                 ll.Style.ForeColor = Color.Brown;

@@ -1,5 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿/*
+ * Copyright © 2017 - Felix Obermaier, Ingenieurgruppe IVV GmbH & Co. KG
+ * 
+ * This file is part of SharpMap.BusinessObjects.MongoDB.Gtfs.
+ *
+ * SharpMap.BusinessObjects.MongoDB.Gtfs is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * SharpMap.BusinessObjects.MongoDB.Gtfs is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with SharpMap; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ *
+ */
+using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -9,6 +28,9 @@ using MongoDB.Driver;
 
 namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ImportFromFolder
     {
         private static volatile int _tried;
@@ -36,8 +58,8 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
             try
             {
                 var client = new MongoClient(GtfsLocalConnection);
-                var server = client.GetServer();
-                var databases = server.GetDatabaseNames();
+                //var server = client.GetServer();
+                //var databases = server.GetDatabaseNames();
                 return client;
             }
             catch(Exception ex)
@@ -46,7 +68,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
                     System.Diagnostics.Process.Start(StartMongoDbServerCommand, StartMongoDbServerArguments);
                 else
                 {
-                    LogManager.GetCurrentClassLogger().Debug(fmh => fmh("MongoDB Server not found or running"));
+                    LogManager.GetCurrentClassLogger().Debug(fmh => fmh("MongoDB Server not found or running\n{0}", ex));
                     throw;
                 }
                 _tried++;
@@ -58,9 +80,8 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
         public static void Import(DirectoryInfo directory)
         {
             var client = GetClient();
-            MongoDatabase database = null;
             client.GetServer().DropDatabase(directory.Name);
-            database = client.GetServer().GetDatabase(directory.Name);
+            var database = client.GetServer().GetDatabase(directory.Name);
 
             // 
             UintIdGenerator.SetKeyTracker(database.GetCollection<UintIdGenerator.UintKeyTracker>("uintkeys"));
@@ -71,22 +92,27 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
             var t3 = Task.Factory.StartNew(ImportRoute, new object[] { database, directory.GetFiles("routes.txt")[0] });
             var t4 = Task.Factory.StartNew(ImportTrip, new object[] { database, directory.GetFiles("trips.txt")[0] });
             var t5 = Task.Factory.StartNew(ImportStopTimes, new object[] { database, directory.GetFiles("stop_times.txt")[0] });
-            var t6 = Task.Factory.StartNew(ImportCalendar, new object[] { database, directory.GetFiles("calendar.txt")[0] });
+            var t6 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("calendar.txt"), (ImportToMongoDb)ImportCalendar });
 
             // Optional
-            var t7 = Task.Factory.StartNew(ImportCalendarDate, new object[] { database, directory.GetFiles("calendar_dates.txt")});
-            var t8 = Task.Factory.StartNew(ImportFareAttribute, new object[] { database, directory.GetFiles("fare_attributes.txt") });
-            var t9 = Task.Factory.StartNew(ImportFareRule, new object[] { database, directory.GetFiles("fare_rules.txt") });
-            var t10 = Task.Factory.StartNew(ImportShape, new object[] { database, directory.GetFiles("shapes.txt") });
-            var t11 = Task.Factory.StartNew(ImportFrequency, new object[] { database, directory.GetFiles("frequencies.txt") });
-            var t12 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("transfers.txt"), (ImportToMongo)ImportTransfer });
-            var t13 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("feed_info.txt"), (ImportToMongo)ImportFeedInfo });
+            var t7 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("calendar_dates.txt"), (ImportToMongoDb)ImportCalendarDate });
+            var t8 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("fare_attributes.txt"), (ImportToMongoDb)ImportFareAttribute });
+            var t9 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("fare_rules.txt"), (ImportToMongoDb)ImportFareRule });
+            var t10 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("shapes.txt"), (ImportToMongoDb)ImportShape });
+            var t11 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("frequencies.txt"), (ImportToMongoDb)ImportFrequency });
+            var t12 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("transfers.txt"), (ImportToMongoDb)ImportTransfer });
+            var t13 = Task.Factory.StartNew(ImportOptional, new object[] { database, directory.GetFiles("feed_info.txt"), (ImportToMongoDb)ImportFeedInfo });
 
             Task.WaitAll(t1, t2, t3, t4, t5, t6, 
                          t7, t8, t9, t10, t11, t12, t13);
         }
 
-        private delegate void ImportToMongo(MongoDatabase db, FileInfo fi);
+        /// <summary>
+        /// Delegate function to import a text file to a MongoDB
+        /// </summary>
+        /// <param name="db">The mongo database</param>
+        /// <param name="fi">The file information</param>
+        private delegate void ImportToMongoDb(MongoDatabase db, FileInfo fi);
 
         private static void ImportOptional(object param)
         {
@@ -94,7 +120,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
             var fileInfo = (FileInfo[])paras[1];
             if (fileInfo != null && fileInfo.Length > 0)
             {
-                var action = (ImportToMongo) paras[2];
+                var action = (ImportToMongoDb) paras[2];
                 var database = (MongoDatabase)paras[0];
                 action(database, fileInfo[0]);
             }
@@ -113,29 +139,11 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
             shape.CreateIndex("from_stop_id", "to_stop_id");
         }
 
-        private static void ImportFrequency(object param)
-        {
-            var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
-            var fileInfo = (FileInfo[])paras[1];
-            if (fileInfo != null && fileInfo.Length > 0)
-                ImportFrequency(database, fileInfo[0]);
-        }
-
         private static void ImportFrequency(MongoDatabase database, FileInfo getFrequency)
         {
             var shape = database.GetCollection<Frequency>(getFrequency.Name);
             shape.InsertBatch(Associator<Frequency>.Read(new StreamReader(getFrequency.OpenRead())));
             shape.CreateIndex("trip_id");
-        }
-
-        private static void ImportShape(object param)
-        {
-            var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
-            var fileInfo = (FileInfo[])paras[1];
-            if (fileInfo != null && fileInfo.Length > 0)
-                ImportShape(database, fileInfo[0]);
         }
 
         private static void ImportShape(MongoDatabase database, FileInfo getShape)
@@ -145,29 +153,11 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
             shape.CreateIndex("shape_id", "shape_sequence");
         }
 
-        private static void ImportFareRule(object param)
-        {
-            var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
-            var fileInfo = (FileInfo[])paras[1];
-            if (fileInfo != null && fileInfo.Length > 0)
-                ImportFareRule(database, fileInfo[0]);
-        }
-
         private static void ImportFareRule(MongoDatabase database, FileInfo getFareRule)
         {
             var fareAttribute = database.GetCollection<FareRule>(getFareRule.Name);
             fareAttribute.InsertBatch(Associator<FareRule>.Read(new StreamReader(getFareRule.OpenRead())));
             fareAttribute.CreateIndex("fare_id", "route_id");
-        }
-
-        private static void ImportFareAttribute(object param)
-        {
-            var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
-            var fileInfo = (FileInfo[])paras[1];
-            if (fileInfo != null && fileInfo.Length > 0)
-                ImportFareAttribute(database, fileInfo[0]);
         }
 
         private static void ImportFareAttribute(MongoDatabase database, FileInfo getFareAttribute)
@@ -177,28 +167,11 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
             fareAttribute.CreateIndex("fare_id");
         }
 
-        private static void ImportCalendarDate(object param)
-        {
-            var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
-            var fileInfo = (FileInfo[])paras[1];
-            if (fileInfo != null && fileInfo.Length > 0)
-                ImportCalendarDate(database, fileInfo[0]);
-        }
-
         private static void ImportCalendarDate(MongoDatabase database, FileInfo getCalenderDate)
         {
             var calendar = database.GetCollection<CalendarDate>("calendar_date");
             calendar.InsertBatch(Associator<CalendarDate>.Read(new StreamReader(getCalenderDate.OpenRead())));
             calendar.CreateIndex("service_id");
-        }
-
-        private static void ImportCalendar(object param)
-        {
-            var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
-            var fileInfo = (FileInfo)paras[1];
-            ImportCalendar(database, fileInfo);
         }
 
         private static void ImportCalendar(MongoDatabase database, FileInfo getFile)

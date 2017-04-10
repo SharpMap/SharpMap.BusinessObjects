@@ -145,7 +145,7 @@
     <Compile Include="MongoDB\MongoDbTests.cs" />
     <Compile Include="MongoDB\PoI.cs" />
     <Compile Include="MongoDB\PoIRepository.cs" />
-    <Compile Include="NHibernating\BusinessObjectRepository.cs" />
+    <Compile Include="NHibernating\BusinessObjectSource.cs" />
     <Compile Include="NHibernating\Country.cs" />
     <Compile Include="NHibernating\GeometryUserType.cs" />
     <Compile Include="NHibernating\NHibernateTests.cs" />
@@ -163,11 +163,11 @@
     </ProjectReference>
     <ProjectReference Include="..\SharpMap.BusinessObjects.MongoDB\SharpMap.BusinessObjects.MongoDB.csproj">
       <Project>{210f7e37-648c-426b-a0c4-101fdcb28362}</Project>
-      <Name>SharpMap.Business.MongoDB</Name>
+      <Name>SharpMap.BusinessObjects.MongoDB</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj">
       <Project>{ac492306-4594-4e1e-a7b4-8982937061f8}</Project>
-      <Name>SharpMap.Business</Name>
+      <Name>SharpMap.BusinessObjects</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

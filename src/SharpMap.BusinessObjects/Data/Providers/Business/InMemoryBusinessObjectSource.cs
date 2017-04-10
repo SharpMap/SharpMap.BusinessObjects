@@ -26,7 +26,7 @@ namespace SharpMap.Data.Providers.Business
     /// Quick and dirty implementation of an in-memory business object store
     /// </summary>
     /// <typeparam name="T">The type of the business object</typeparam>
-    public class InMemoryBusinessObjectAccess<T> : BusinessObjectAccessBase<T>
+    public class InMemoryBusinessObjectSource<T> : BaseBusinessObjectSource<T>
     {
         private readonly Dictionary<uint, T> _businessObjects;
 
@@ -35,14 +35,14 @@ namespace SharpMap.Data.Providers.Business
         /// <summary>
         /// Creates an instance of this class
         /// </summary>
-        public InMemoryBusinessObjectAccess()
+        public InMemoryBusinessObjectSource()
             :this(typeof(T).Name)
         {}
 
         /// <summary>
         /// Creates an instance of this class, assigning a <see cref="Title"/>
         /// </summary>
-        public InMemoryBusinessObjectAccess(string title)
+        public InMemoryBusinessObjectSource(string title)
         {
             _businessObjects = new Dictionary<uint, T>();
             _title = title;

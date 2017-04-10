@@ -62,9 +62,9 @@ namespace SharpMap.Business.Tests.EF6
         [Test]
         public void BusinessObjectRepositoryTest()
         {
-            EF6BusinessObjectRepository<University> bos = null;
+            EF6BusinessObjectSource<University> bos = null;
 
-            Assert.DoesNotThrow( () => bos = new EF6BusinessObjectRepository<University>(() => new UniversityContext()));
+            Assert.DoesNotThrow( () => bos = new EF6BusinessObjectSource<University>(() => new UniversityContext()));
             Assert.IsNotNull(bos);
             Assert.AreEqual(2, bos.Count);
 
@@ -116,7 +116,7 @@ namespace SharpMap.Business.Tests.EF6
         {
             BusinessObjectProvider<University> p = null;
             Assert.DoesNotThrow(() => p= new BusinessObjectProvider<University>("XYZ",
-                new EF6BusinessObjectRepository<University>(() => new UniversityContext())));
+                new EF6BusinessObjectSource<University>(() => new UniversityContext())));
 
             Assert.IsNotNull(p);
             Assert.AreEqual(2, p.GetFeatureCount());
@@ -139,7 +139,7 @@ namespace SharpMap.Business.Tests.EF6
             Assert.GreaterOrEqual(1, fds.Tables[0].Rows.Count);
 
             fds = new FeatureDataSet();
-            var r = p.Source as EF6BusinessObjectRepository<University>;
+            var r = p.Source as EF6BusinessObjectSource<University>;
             using (var c = r.Context)
             {
                 var pDbBuf = pBuf.ToDbGeometry();

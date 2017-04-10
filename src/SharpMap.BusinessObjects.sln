@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26403.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpMap.BusinessObjects", "SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj", "{AC492306-4594-4E1E-A7B4-8982937061F8}"
 EndProject
@@ -12,6 +12,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpMap.BusinessObjects.MongoDB.Gtfs", "SharpMap.BusinessObjects.MongoDB.Gtfs\SharpMap.BusinessObjects.MongoDB.Gtfs.csproj", "{513BE777-DCCE-43A1-A727-F521C570BCFD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpMap.BusinessObjects.Tests", "SharpMap.BusinessObjects.Tests\SharpMap.BusinessObjects.Tests.csproj", "{6BB66868-62EA-49C7-A6F4-06B87E2BDE6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{3F947150-250D-4662-AA5D-E970C66C0C7B}"
+	ProjectSection(SolutionItems) = preProject
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

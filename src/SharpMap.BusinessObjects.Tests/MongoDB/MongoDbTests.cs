@@ -106,7 +106,7 @@ namespace SharpMap.Business.Tests.MongoDB
         [Test]
         public void Test1()
         {
-            MongoDBBusinessObjectRepository<PoI, GeoJson2DCoordinates> repo = null;
+            MongoDbBusinessObjectSource<PoI, GeoJson2DCoordinates> repo = null;
             Assert.DoesNotThrow( () => repo =
                 new PoIRepository(
                     GeoJsonConverter.Converter2D,
@@ -119,7 +119,7 @@ namespace SharpMap.Business.Tests.MongoDB
         [Test]
         public void Test2()
         {
-            MongoDBBusinessObjectRepository<PoI, GeoJson2DCoordinates> repo = null;
+            MongoDbBusinessObjectSource<PoI, GeoJson2DCoordinates> repo = null;
             Assert.DoesNotThrow(() => repo =
                 new PoIRepository(
                     GeoJsonConverter.Converter2D,
@@ -134,7 +134,7 @@ namespace SharpMap.Business.Tests.MongoDB
         [Test]
         public void TestWithProvider()
         {
-            MongoDBBusinessObjectRepository<PoI, GeoJson2DCoordinates> repo = null;
+            MongoDbBusinessObjectSource<PoI, GeoJson2DCoordinates> repo = null;
             Assert.DoesNotThrow(() => repo =
                 new PoIRepository(
                     GeoJsonConverter.Converter2D,

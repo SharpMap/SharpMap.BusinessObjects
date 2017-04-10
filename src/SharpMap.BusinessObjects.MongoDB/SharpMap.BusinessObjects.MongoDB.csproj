@@ -101,7 +101,7 @@
     <Compile Include="Converters\GeoJsonConverter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\Providers\Business\MongoDBBusinessObjectRepository.cs" />
+    <Compile Include="Data\Providers\Business\MongoDbBusinessObjectSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -113,7 +113,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj">
       <Project>{ac492306-4594-4e1e-a7b4-8982937061f8}</Project>
-      <Name>SharpMap.Business</Name>
+      <Name>SharpMap.BusinessObjects</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

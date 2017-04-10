@@ -31,13 +31,13 @@ namespace SharpMap.Data.Providers.Business
     /// </summary>
     /// <typeparam name="T">The type of the business object</typeparam>
     /// <typeparam name="TCoordinate">The type of the <see cref="GeoJsonCoordinates"/> to use.</typeparam>
-    public abstract class MongoDBBusinessObjectRepository<T, TCoordinate> : BusinessObjectAccessBase<T>
+    public abstract class MongoDbBusinessObjectSource<T, TCoordinate> : BaseBusinessObjectSource<T>
         where TCoordinate: GeoJsonCoordinates
     {
         private readonly MongoCollection<T> _collection;
         protected readonly GeoJsonConverter<TCoordinate> Converter;
 
-        private MongoDBBusinessObjectRepository(GeoJsonConverter<TCoordinate> converter)
+        private MongoDbBusinessObjectSource(GeoJsonConverter<TCoordinate> converter)
         {
             base.Title = typeof (T).Name;
             
@@ -53,17 +53,17 @@ namespace SharpMap.Data.Providers.Business
             }
         }
 
-        protected MongoDBBusinessObjectRepository(GeoJsonConverter<TCoordinate> converter, MongoClientSettings settings, string database, string collection)
+        protected MongoDbBusinessObjectSource(GeoJsonConverter<TCoordinate> converter, MongoClientSettings settings, string database, string collection)
             : this(converter,new MongoClient(settings), database, collection)
         {
         }
 
-        protected MongoDBBusinessObjectRepository(GeoJsonConverter<TCoordinate> converter, string connectionString, string database, string collection)
+        protected MongoDbBusinessObjectSource(GeoJsonConverter<TCoordinate> converter, string connectionString, string database, string collection)
             : this(converter,new MongoClient(connectionString), database, collection)
         {
         }
 
-        private MongoDBBusinessObjectRepository(GeoJsonConverter<TCoordinate> converter, MongoClient mongoClient, string database, string collection)
+        private MongoDbBusinessObjectSource(GeoJsonConverter<TCoordinate> converter, MongoClient mongoClient, string database, string collection)
             :this(converter)
         {
             var mongoDatabase = mongoClient.GetServer().GetDatabase(database);

@@ -26,7 +26,7 @@ namespace SharpMap.Data.Providers.Business
     /// An abstract base class implementation of an <see cref="IBusinessObjectSource{T}"/>
     /// </summary>
     /// <typeparam name="T">The type of the business object</typeparam>
-    public abstract class BusinessObjectAccessBase<T> : IBusinessObjectSource<T>
+    public abstract class BaseBusinessObjectSource<T> : IBusinessObjectSource<T>
     {
 // ReSharper disable InconsistentNaming
         protected static readonly TypeUtility<T>.MemberGetDelegate<uint> _getId;
@@ -36,7 +36,7 @@ namespace SharpMap.Data.Providers.Business
         /// <summary>
         /// Static constructor
         /// </summary>
-        static BusinessObjectAccessBase()
+        static BaseBusinessObjectSource()
         {
             _getId = TypeUtility<T>.GetMemberGetDelegate<uint>(typeof(BusinessObjectIdentifierAttribute));
             _getGeometry = TypeUtility<T>.GetMemberGetDelegate<IGeometry>(typeof(BusinessObjectGeometryAttribute));

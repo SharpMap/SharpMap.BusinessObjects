@@ -4,7 +4,11 @@ using MongoDB.Bson.Serialization.IdGenerators;
 namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
 {
     /// <summary>
-    /// One or more transit agencies that provide the data in this feed.
+    /// An Agency is an operator of a public transit network, often a public authority. 
+    /// Agencies are defined in the file <see cref="Agency"/> file, and can have URLs, 
+    /// phone numbers, and language indicators. If you are providing a feed that includes 
+    /// vehicles operated by different agencies, you can define multiple agencies in this 
+    /// file and associate them with each Trip.
     /// </summary>
     public class Agency
     {
@@ -12,8 +16,8 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// Gets or sets a value indicating the agency id
         /// </summary>
         /// <remarks>The agency_id field is an ID that uniquely identifies a transit agency. A transit feed may represent data from more than one agency. The agency_id is dataset unique. This field is optional for transit feeds that only contain data for a single agency.</remarks>
-        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         [BsonElement("agency_id")]
+        [BsonRequired]
         public string AgencyID { get; set; }
 
         /// <summary>
@@ -21,6 +25,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// </summary>
         /// <remarks>The agency_name field contains the full name of the transit agency. Google Maps will display this name.</remarks>
         [BsonElement("agency_name")]
+        [BsonRequired]
         public string AgencyName { get; set; }
         
         /// <summary>
@@ -28,6 +33,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// </summary>
         /// <remarks>The agency_url field contains the URL of the transit agency. The value must be a fully qualified URL that includes http:// or https://, and any special characters in the URL must be correctly escaped. See http://www.w3.org/Addressing/URL/4_URI_Recommentations.html for a description of how to create fully qualified URL values.</remarks>
         [BsonElement("agency_url")]
+        [BsonRequired]
         public string AgencyUrl { get; set; }
 
         /// <summary>
@@ -35,6 +41,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// </summary>
         /// <remarks>The agency_timezone field contains the timezone where the transit agency is located. Timezone names never contain the space character but may contain an underscore. Please refer to http://en.wikipedia.org/wiki/List_of_tz_zones for a list of valid values. If multiple agencies are specified in the feed, each must have the same agency_timezone.</remarks>
         [BsonElement("agency_timezone")]
+        [BsonRequired]
         public string AgencyTimezone { get; set; }
 
         /// <summary>

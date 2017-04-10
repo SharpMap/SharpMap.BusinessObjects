@@ -1,5 +1,24 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.IdGenerators;
+﻿/*
+ * Copyright © 2017 - Felix Obermaier, Ingenieurgruppe IVV GmbH & Co. KG
+ * 
+ * This file is part of SharpMap.BusinessObjects.MongoDB.Gtfs.
+ *
+ * SharpMap.BusinessObjects.MongoDB.Gtfs is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * SharpMap.BusinessObjects.MongoDB.Gtfs is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with SharpMap; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ *
+ */
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
 {
@@ -25,7 +44,6 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// <summary>
         /// The trip_id field contains an ID that identifies a trip. The trip_id is dataset unique.
         /// </summary>
-        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         [BsonRequired]
         [BsonElement("trip_id")]
         public string TripId { get; set; }

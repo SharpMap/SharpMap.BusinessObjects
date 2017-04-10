@@ -102,9 +102,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\Providers\Business\EF6BusinessObjectRepository.cs" />
+    <Compile Include="Data\Providers\Business\EF6BusinessObjectSource.cs" />
+    <Compile Include="Data\Providers\Business\EF6SpatialGeographyObjectBase.cs" />
+    <Compile Include="Data\Providers\Business\EF6SpatialGeometryObjectBase.cs" />
     <Compile Include="Data\Providers\Business\EF6SpatialObjectExtension.cs" />
     <Compile Include="Data\Providers\Business\IEF6SpatialGeographyObject.cs" />
+    <Compile Include="Data\Providers\Business\IEF6SpatialGeometryObject.cs" />
     <Compile Include="Data\Providers\Business\IEF6SpatialObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />
@@ -146,7 +149,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj">
       <Project>{ac492306-4594-4e1e-a7b4-8982937061f8}</Project>
-      <Name>SharpMap.Business</Name>
+      <Name>SharpMap.BusinessObjects</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

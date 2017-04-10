@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2"
-                   assembly="SharpMap.Data.Providers.Business.Tests"
-                   namespace="SharpMap.Data.Providers.Business.Tests.NHibernating">
+                   assembly="SharpMap.BusinessObjects.Tests"
+                   namespace="SharpMap.Business.Tests.NHibernating">
   <class name="Country"
          table="countries2">
     <id name="PKID">
       <generator class="increment"/>
     </id>
-    <property name="Geometry" type="SharpMap.Data.Providers.Business.Tests.NHibernating.GeometryUserType, SharpMap.Data.Providers.Business.Tests" />
+    <property name="Geometry" type="SharpMap.Business.Tests.NHibernating.GeometryUserType, SharpMap.BusinessObjects.Tests" />
     <property name="Sovereignt" column="sovereignt" length="50" />
     <property name="Sovereignt_Abbreviation" column="sovereignt_abbreviation" length="5" />
     <property name="Admin" column="admin" length="50" />

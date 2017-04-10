@@ -16,8 +16,8 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// can appear at most once in a calendar.txt file. This value is dataset 
         /// unique. It is referenced by the trips.txt file.
         /// </remarks>
-        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
         [BsonElement("service_id")]
+        [BsonRequired]
         public string ServiceID { get; set; }
 
         /// <summary>
@@ -33,6 +33,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// Note: You may list exceptions for particular dates, such as holidays, in the calendar_dates.txt file.
         /// </remarks>
         [BsonElement("monday")]
+        [BsonRequired]
         public bool Monday { get; set; }
 
         /// <summary>
@@ -48,6 +49,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// Note: You may list exceptions for particular dates, such as holidays, in the calendar_dates.txt file.
         /// </remarks>
         [BsonElement("tuesday")]
+        [BsonRequired]
         public bool Tuesday { get; set; }
 
         /// <summary>
@@ -63,6 +65,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// Note: You may list exceptions for particular dates, such as holidays, in the calendar_dates.txt file.
         /// </remarks>
         [BsonElement("wednessday")]
+        [BsonRequired]
         public bool Wednessday { get; set; }
 
         /// <summary>
@@ -78,6 +81,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// Note: You may list exceptions for particular dates, such as holidays, in the calendar_dates.txt file.
         /// </remarks>
         [BsonElement("thursday")]
+        [BsonRequired]
         public bool Thursday { get; set; }
 
         /// <summary>
@@ -93,6 +97,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// Note: You may list exceptions for particular dates, such as holidays, in the calendar_dates.txt file.
         /// </remarks>
         [BsonElement("friday")]
+        [BsonRequired]
         public bool Friday { get; set; }
 
         /// <summary>
@@ -108,6 +113,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// Note: You may list exceptions for particular dates, such as holidays, in the calendar_dates.txt file.
         /// </remarks>
         [BsonElement("saturday")]
+        [BsonRequired]
         public bool Saturday { get; set; }
 
         /// <summary>
@@ -123,6 +129,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// Note: You may list exceptions for particular dates, such as holidays, in the calendar_dates.txt file.
         /// </remarks>
         [BsonElement("sunday")]
+        [BsonRequired]
         public bool Sunday { get; set; }
 
         /// <summary>
@@ -132,6 +139,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// The start_date field's value should be in YYYYMMDD format.
         /// </remarks>
         [BsonElement("start_date")]
+        [BsonRequired]
         public DateTime StartDate { get; set; }
 
         /// <summary>
@@ -141,6 +149,7 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs
         /// The end_date field's value should be in YYYYMMDD format.
         /// </remarks>
         [BsonElement("end_date")]
+        [BsonRequired]
         public DateTime EndDate { get; set; }
     }
 }
