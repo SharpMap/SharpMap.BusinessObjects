@@ -56,14 +56,15 @@ namespace SharpMap.Data.Providers.Business
     }
 
     [Serializable]
-    public class BusinessObjectProvider<TFeature> : IProvider
+    public class BusinessObjectProvider<TFeature> : BusinessObjectFilterProvider, IProvider
     {
+
         [NonSerialized]
         private static FeatureDataTable SchemaTable;
 
         [NonSerialized]
         private static readonly List<Func<TFeature, object>> GetDelegates;
-        
+
         static BusinessObjectProvider()
         {
             GetDelegates = new List<Func<TFeature, object>>();
@@ -108,7 +109,7 @@ namespace SharpMap.Data.Providers.Business
             foreach (var kvp in dict)
                 list.Add(Tuple.Create(kvp.Key, kvp.Value));
             list.Sort((a, b) => a.Item2.Ordinal.CompareTo(b.Item2.Ordinal));
-            
+
             return list;
         }
 
@@ -118,7 +119,7 @@ namespace SharpMap.Data.Providers.Business
             var pis = t.GetProperties(/*BindingFlags.Public | BindingFlags.Instance*/);
             foreach (var pi in pis)
             {
-                var att = pi.GetCustomAttributes(typeof (BusinessObjectAttributeAttribute), true);
+                var att = pi.GetCustomAttributes(typeof(BusinessObjectAttributeAttribute), true);
                 if (att.Length > 0)
                 {
                     if (!collection.ContainsKey(pi.Name))
@@ -135,7 +136,7 @@ namespace SharpMap.Data.Providers.Business
                         collection.Add(fi.Name, (BusinessObjectAttributeAttribute)att[0]);
                 }
             }
-            if (t.BaseType != typeof (object))
+            if (t.BaseType != typeof(object))
                 GetPublicMembers(t.BaseType, collection);
         }
 
@@ -160,9 +161,9 @@ namespace SharpMap.Data.Providers.Business
         }
 
         public string ConnectionID { get; private set; }
-        
+
         public bool IsOpen { get; private set; }
-        
+
         public int SRID { get; set; }
 
         /// <summary>
@@ -175,7 +176,10 @@ namespace SharpMap.Data.Providers.Business
             var res = new Collection<IGeometry>();
             foreach (TFeature feature in _source.Select(bbox))
             {
-                res.Add(_source.GetGeometry(feature));
+                if (FilterDelegate == null || FilterDelegate(feature))
+                {
+                    res.Add(_source.GetGeometry(feature));
+                }
             }
             return res;
         }
@@ -185,7 +189,10 @@ namespace SharpMap.Data.Providers.Business
             var res = new Collection<uint>();
             foreach (TFeature feature in _source.Select(bbox))
             {
-                res.Add(_source.GetId(feature));
+                if (FilterDelegate == null || FilterDelegate(feature))
+                {
+                    res.Add(_source.GetId(feature));
+                }
             }
             return res;
         }
@@ -204,8 +211,11 @@ namespace SharpMap.Data.Providers.Business
             resTable.BeginLoadData();
             foreach (var feature in _source.Select(geom))
             {
-                var fdr = (FeatureDataRow)resTable.LoadDataRow(ToItemArray(feature), LoadOption.OverwriteChanges);
-                fdr.Geometry = _source.GetGeometry(feature);
+                if (FilterDelegate == null || FilterDelegate(feature))
+                {
+                    var fdr = (FeatureDataRow)resTable.LoadDataRow(ToItemArray(feature), LoadOption.OverwriteChanges);
+                    fdr.Geometry = _source.GetGeometry(feature);
+                }
             }
             resTable.EndLoadData();
             ds.Tables.Add(resTable);
@@ -218,8 +228,11 @@ namespace SharpMap.Data.Providers.Business
             resTable.BeginLoadData();
             foreach (var feature in _source.Select(box))
             {
-                var fdr = (FeatureDataRow)resTable.LoadDataRow(ToItemArray(feature), LoadOption.OverwriteChanges);
-                fdr.Geometry = _source.GetGeometry(feature);
+                if (FilterDelegate == null || FilterDelegate(feature))
+                {
+                    var fdr = (FeatureDataRow)resTable.LoadDataRow(ToItemArray(feature), LoadOption.OverwriteChanges);
+                    fdr.Geometry = _source.GetGeometry(feature);
+                }
             }
             resTable.EndLoadData();
             ds.Tables.Add(resTable);
@@ -299,5 +312,6 @@ namespace SharpMap.Data.Providers.Business
         {
             IsOpen = false;
         }
+
     }
 }
