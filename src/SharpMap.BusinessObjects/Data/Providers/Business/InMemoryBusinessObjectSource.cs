@@ -55,7 +55,19 @@ namespace SharpMap.Data.Providers.Business
         {
             get { return _title; }
         }
-
+        /// <summary>
+        /// Collection of business objects for querying using Select(IQueryable<T> query)
+        /// or to directly edit attributes of one or more objects
+        ///</summary>
+        public ICollection<T> Context
+        {
+            get
+            {
+                lock (((ICollection)_businessObjects).SyncRoot)
+                    return _businessObjects.Values;
+            }
+        }
+        
         /// <summary>
         /// Select a set of features based on <paramref name="box"/>
         /// </summary>
@@ -136,6 +148,32 @@ namespace SharpMap.Data.Providers.Business
                 }
                 CachedExtents = null;
             }
+        }
+
+        /// <summary>
+        /// Delete objects by provided <paramref name="oids"/>
+        /// </summary>
+        /// <param name="oids">ObjectIds of features to be deleted</param>
+        public void Delete(IEnumerable<uint> oids)
+        {
+            lock (((ICollection)_businessObjects).SyncRoot)
+            {
+                foreach (uint oid in oids)
+                {
+                    _businessObjects.Remove(oid);
+                }
+                CachedExtents = null;
+            }
+        }
+
+        public void Clear()
+        {
+            lock (((ICollection)_businessObjects).SyncRoot)
+            {
+                _businessObjects.Clear();
+                CachedExtents = null;
+            }
+
         }
 
         /// <summary>
