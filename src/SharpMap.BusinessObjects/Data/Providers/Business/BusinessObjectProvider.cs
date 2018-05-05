@@ -140,7 +140,7 @@ namespace SharpMap.Data.Providers.Business
                 GetPublicMembers(t.BaseType, collection);
         }
 
-        protected readonly IBusinessObjectSource<TFeature> _source;
+        private readonly IBusinessObjectSource<TFeature> _source;
 
         /// <summary>
         /// Creates an instance of this class
