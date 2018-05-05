@@ -15,6 +15,7 @@
 // along with SharpMap; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
@@ -73,10 +74,22 @@ namespace SharpMap.Data.Providers.Business
         void Delete(IEnumerable<T> businessObjects);
 
         /// <summary>
+        /// Attribute-based deletion according to provided <paramref name="match"/>
+        /// </summary>
+        /// <param name="match"><typeparamref name="Predicate<T>"/> identifying business objects to be deleted</param>
+        void Delete(Predicate<T> match);
+
+        /// <summary>
         /// Insert the provided <paramref name="businessObjects"/>
         /// </summary>
         /// <param name="businessObjects">The features that need to be inserted</param>
         void Insert(IEnumerable<T> businessObjects);
+
+        /// <summary>
+        /// Insert provided <paramref name="businessObject"/> and expand extents
+        /// </summary>
+        /// <param name="businessObject">The business object to be inserted</param>
+        void Insert(T businessObject);
 
         /// <summary>
         /// Method to get the geometry of a specific feature
@@ -102,5 +115,26 @@ namespace SharpMap.Data.Providers.Business
         /// </summary>
         /// <returns>The extents</returns>
         Envelope GetExtents();
+
+        /// <summary>
+        /// Attribute-based selection according to <paramref name="match"/>
+        /// </summary>
+        /// <param name="match">The predicate</param>
+        /// <returns>The the first business object matching the predicate</returns>
+        T Find(Predicate<T> match);
+
+        /// <summary>
+        /// Attribute-based selection according to <paramref name="match"/>
+        /// </summary>
+        /// <param name="match">The predicate</param>
+        /// <returns>An array of business objects matching the predicate</returns>
+        T[] FindAll(Predicate<T> match);
+
+        /// <summary>
+        /// The business objects contained by the Source
+        /// </summary>
+        /// <returns>A shallow copy of the business objects</returns>
+        T[] AsReadOnly();
+
     }
 }

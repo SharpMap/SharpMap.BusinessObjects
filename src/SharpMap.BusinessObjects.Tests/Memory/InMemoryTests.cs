@@ -51,6 +51,119 @@ namespace SharpMap.Business.Tests.Memory
         }
 
         [Test]
+        public void TestAttributeSelection()
+        {
+            IProvider p = null;
+            var data = PointsOfInterest.Create();
+            Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(data));
+
+            FeatureDataRow row = null;
+            Assert.DoesNotThrow(() => row = p.GetFeature(4));
+            Assert.IsNotNull(row);
+            Assert.IsNotNull(row.Geometry);
+            Assert.AreEqual(OgcGeometryType.Point, row.Geometry.OgcGeometryType);
+            Assert.AreEqual(new Coordinate(0, 1), row.Geometry.Coordinate);
+
+            var bop = ((BusinessObjectProvider<PointOfInterest>)p).Source;
+            // select single business objects
+            var bo = bop.Find(b => b.Address == "lc");
+
+            Assert.NotNull(bo);
+            Assert.AreEqual(bo.ID, row["ID"]);
+            Assert.AreEqual(bo.Geometry, row.Geometry);
+            Assert.AreEqual(bo.Address, row["Address"]);
+        }
+
+        [Test]
+        public void TestAttributeSelectionMulti()
+        {
+            IProvider p = null;
+            var data = PointsOfInterest.Create();
+            Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(data));
+
+            var bop = ((BusinessObjectProvider<PointOfInterest>)p).Source;
+            // select 5 business objects
+            PointOfInterest[] pts;
+            pts= bop.FindAll(b => b.ID < 6 && b.Kind == "African food");
+            Assert.NotNull(pts);
+            Assert.AreEqual(pts.Length, 5);
+        }
+
+        [Test]
+        public void TestAsReadOnly()
+        {
+            IProvider p = null;
+            var data = PointsOfInterest.Create();
+            Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(data));
+
+            var bop = ((BusinessObjectProvider<PointOfInterest>)p).Source;
+            // select all business objects
+            PointOfInterest[] pts;
+            pts = bop.AsReadOnly();
+            Assert.NotNull(pts);
+            Assert.AreEqual(pts.Length, 9);
+        }
+
+        [Test]
+        public void TestAttributeUpdate()
+        {
+            IProvider p = null;
+            var data = PointsOfInterest.Create();
+            Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(data));
+
+            var bop = ((BusinessObjectProvider<PointOfInterest>)p).Source;
+            // update single business object
+            var bo = bop.Find(b => b.Address == "lc");
+            Assert.AreEqual(bo.Kind, "African food");
+            bo.Kind = "Indian food";
+
+            FeatureDataRow row = null;
+            Assert.DoesNotThrow(() => row = p.GetFeature(4));
+            Assert.IsNotNull(row);
+            Assert.AreEqual(bo.Kind , row["Kind"]);
+        }
+
+        [Test]
+        public void TestAttributeDelete()
+        {
+            IProvider p = null;
+            var data = PointsOfInterest.Create();
+            Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(data));
+
+            var bop = ((BusinessObjectProvider<PointOfInterest>)p).Source;
+
+            var cnt = bop.Count;
+            var env = bop.GetExtents();
+            // delete 3 features on RHS
+            bop.Delete(b => b.Address == "rl" || b.Address == "cr" || b.Address == "tr");
+
+            Assert.AreEqual(bop.Count, cnt - 3);
+            Assert.That(env.Width == 2 && env.Height == 2);
+            Assert.That(bop.GetExtents().Width == 1 && bop.GetExtents().Height == 2);
+        }
+
+        [Test]
+        public void TestBusinessObjectInsert()
+        {
+            IProvider p = null;
+            var data = PointsOfInterest.Create();
+            Assert.DoesNotThrow(() => p = BusinessObjectProvider.Create(data));
+
+            var bop = ((BusinessObjectProvider<PointOfInterest>)p).Source;
+
+            var cnt = bop.Count;
+            var env = bop.GetExtents();
+
+            // insert single feature outside of existing extents
+            var f = GeoAPI.GeometryServiceProvider.Instance.CreateGeometryFactory(4326);
+            var coord = new Coordinate(env.Right() + 10, env.Top() + 10);
+            PointOfInterest bo = new PointOfInterest { ID = 10, Address = "tr++", Kind = "Thai food", Geometry = f.CreatePoint(coord) };
+            bop.Insert(bo);
+
+            Assert.AreEqual(bop.Count, cnt + 1);
+            Assert.That(bop.GetExtents().Contains(coord));
+        }
+        [Test]
         public void TestGetExtetnts()
         {
             IProvider p = null;
