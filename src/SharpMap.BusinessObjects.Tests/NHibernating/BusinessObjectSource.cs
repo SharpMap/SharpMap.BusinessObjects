@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using GeoAPI.Geometries;
 using NHibernate;
 using NHibernate.Criterion;
@@ -15,7 +15,7 @@ namespace SharpMap.Business.Tests.NHibernating
         {
             _title = typeof (T).Name;
         }
-        private static ISession GetSession()
+        private static NHibernate.ISession GetSession()
         {
             return SessionProvider.SessionFactory.OpenSession();
         }

@@ -1,4 +1,4 @@
-﻿// Copyright 2014 - Felix Obermaier (www.ivv-aachen.de)
+// Copyright 2014 - Felix Obermaier (www.ivv-aachen.de)
 //
 // This file is part of SharpMap.BusinessObjects.
 // SharpMap.BusinessObjects is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@ using GeoAPI.Geometries;
 using SharpMap.Data;
 using SharpMap.Data.Providers;
 using SharpMap.Data.Providers.Business;
+using SharpMap.Rendering;
 using SharpMap.Rendering.Business;
 using SharpMap.Rendering.Thematics;
 using SharpMap.Styles;
@@ -134,8 +135,7 @@ namespace SharpMap.Layers
         {
             Logger.Info(fmh => fmh("Renderer changed: {0}", _businessObjectRenderer != null ? _businessObjectRenderer.GetType().Name : "null"));
 
-            if (RendererChanged != null)
-                RendererChanged(this, e);
+            RendererChanged?.Invoke(this, e);
         }
 
         /// <inheritdoc />
@@ -185,7 +185,8 @@ namespace SharpMap.Layers
         /// Renders the layer
         /// </summary>
         /// <param name="g">Graphics object reference</param><param name="map">Map which is rendered</param>
-        public override void Render(Graphics g, Map map)
+        /// <param name="affectedArea">The area that is affected by the rendering</param>
+        protected override void Render(Graphics g, MapViewport map, out Rectangle affectedArea)
         {
             if (_businessObjectRenderer != null)
             {
@@ -203,9 +204,10 @@ namespace SharpMap.Layers
                 var env = ToSource(map.Envelope);
 
                 // Render all objects
+                Rectangle affected = Rectangle.Empty;
                 foreach (var bo in _source.Select(env))
                 {
-                    _businessObjectRenderer.Render(bo);
+                    affectedArea.ExpandToInclude(_businessObjectRenderer.Render(bo));
                 }
 
                 // Finish rendering

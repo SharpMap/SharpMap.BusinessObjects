@@ -1,6 +1,6 @@
 using GeoAPI.Geometries;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using MongoDB.Driver.GeoJsonObjectModel;
 using SharpMap.Converters;
 using SharpMap.Data.Providers.Business;
@@ -20,10 +20,10 @@ namespace SharpMap.Business.Tests.MongoDB
         }
 
 
-        protected override IMongoQuery BuildEnvelopeQuery(Envelope box)
+        protected override FilterDefinition<PoI> BuildEnvelopeQuery(Envelope box)
         {
-            //return Query<PoI>.GeoIntersects(t => t.BsonGeometry, Converter.ToPolygon(box));        
-            return Query<PoI>.WithinRectangle(t => t.BsonGeometry, box.MinX, box.MinY, box.MaxX, box.MaxY);        
+            //return Query<PoI>.GeoIntersects(t => t.BsonGeometry, Converter.ToPolygon(box));
+            return Builders<PoI>.Filter.GeoWithinBox(t => t.BsonGeometry, box.MinX, box.MinY, box.MaxX, box.MaxY);        
         }
     }
 }

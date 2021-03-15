@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 - Felix Obermaier, Ingenieurgruppe IVV GmbH & Co. KG
+ * Copyright Â© 2017 - Felix Obermaier, Ingenieurgruppe IVV GmbH & Co. KG
  * 
  * This file is part of SharpMap.BusinessObjects.MongoDB.Gtfs.
  *
@@ -30,9 +30,9 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
     internal class UintIdGenerator : IIdGenerator
     {
         private static readonly object Lock = new object();
-        private static MongoCollection<UintKeyTracker> _uintKeyTracker;
+        private static IMongoCollection<UintKeyTracker> _uintKeyTracker;
 
-        public static void SetKeyTracker(MongoCollection<UintKeyTracker> keyTracker)
+        public static void SetKeyTracker(IMongoCollection<UintKeyTracker> keyTracker)
         {
             if (_uintKeyTracker != null)
                 throw new InvalidOperationException();
@@ -47,22 +47,23 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
 
         public object GenerateId(object container, object document)
         {
-            var mc = container as MongoCollection;
-            if (mc == null)
+            if (!(container is IMongoCollection<UintKeyTracker> mc))
                 throw new ArgumentException("container must be a mongo collection");
 
-            UintKeyTracker keyTracker = null;
+            string mcName = mc.CollectionNamespace.FullName;
+            var filter = Builders<UintKeyTracker>.Filter.Exists(t => t.CollectionName == mcName);
             Monitor.Enter(Lock);
-            keyTracker = _uintKeyTracker.FindOneByIdAs<UintKeyTracker>(mc.Name);
+            var keyTracker = _uintKeyTracker.Find(filter).FirstOrDefault();
             if (keyTracker != null)
             {
                 keyTracker.LastKey++;
+                _uintKeyTracker.ReplaceOne(filter, keyTracker);
             }
             else
             {
-                keyTracker = new UintKeyTracker {CollectionName = mc.Name, LastKey = 1};
+                keyTracker = new UintKeyTracker {CollectionName = mc.CollectionNamespace.CollectionName, LastKey = 1};
+                _uintKeyTracker.InsertOne(keyTracker);
             }
-            _uintKeyTracker.Save(keyTracker);
             Monitor.Exit(Lock);
 
             return keyTracker.LastKey;

@@ -18,6 +18,8 @@ namespace SharpMap.Business.Tests.MongoDB
     /// </summary>
     public class MongoDbTests
     {
+        private static readonly ILog Log = LogManager.GetLogger<MongoDbTests>();
+
         private MongoClient _client;
 
         private const string TestConnection = "mongodb://localhost";
@@ -32,16 +34,15 @@ namespace SharpMap.Business.Tests.MongoDB
             try
             {
                 var client = new MongoClient(TestConnection);
-                var server = client.GetServer();
-                foreach (var dbNames in server.GetDatabaseNames())
+                foreach (var dbNames in client.ListDatabaseNames().ToEnumerable())
                 {
-                    LogManager.GetCurrentClassLogger().Debug(fmh => fmh("{0}", dbNames));
+                    Log.Debug(fmh => fmh("{0}", dbNames));
                 }
                 return client;
             }
             catch (Exception ex)
             {
-                LogManager.GetCurrentClassLogger().Debug(fmh => fmh("MongoDB Server not found or running"));
+                Log.Debug(fmh => fmh("MongoDB Server not found or running"));
             }
             return null;
         }
@@ -69,25 +70,32 @@ namespace SharpMap.Business.Tests.MongoDB
             if (_client == null)
                 throw new IgnoreException("Creation of MongoClient failed");
 
-            var server = _client.GetServer();
+            /*
+            //var server = _client.Settings.;
             if (server.BuildInfo != null)
             {
                 if (server.BuildInfo.Version < new Version(2, 4))
                     throw new IgnoreException("MongoDB server must have at least version 2.4");
             }
-
-            if (server.DatabaseExists(TestDatabase))
-                server.DropDatabase(TestDatabase);
+             */
+            if (_client.GetDatabase(TestDatabase) != null)
+                _client.DropDatabase(TestDatabase);
 
             GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
-            CreatePoIDatabase(server);
+            CreatePoIDatabase(_client);
         }
 
-        private static void CreatePoIDatabase(MongoServer server)
+        private static void CreatePoIDatabase(IMongoClient client)
         {
-            var db = server.GetDatabase(TestDatabase);
-            if (!db.CreateCollection("Items").Ok)
-                throw new IgnoreException("Faild to create collection items");
+            var db = client.GetDatabase(TestDatabase);
+            try
+            {
+                db.CreateCollection("Items");
+            }
+            catch (Exception e)
+            {
+                throw new IgnoreException("Faild to create collection items", e);
+            }
 
             //Assign the converter
             PoI.Converter = GeoJsonConverter.Converter2D;
@@ -96,7 +104,7 @@ namespace SharpMap.Business.Tests.MongoDB
             var factory = GeoAPI.GeometryServiceProvider.Instance.CreateGeometryFactory(4326);
             for (uint oid = 1; oid <= 1000; oid++)
             {
-                col.Insert(RndPoi(ref oid, factory));
+                col.InsertOne(RndPoi(ref oid, factory));
             }
             
 

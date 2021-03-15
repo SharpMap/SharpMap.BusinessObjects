@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Windows.Forms;
 using GeoAPI.Geometries;
 using NUnit.Framework;
 using SharpMap.Data;
@@ -119,7 +118,7 @@ namespace SharpMap.Business.Tests.NHibernating
         {
             using (var m = new Map(new Size(720, 360)))
             {
-                VectorRenderer.SizeOfString = (g, s, f) => TextRenderer.MeasureText(g, s, f);
+                //VectorRenderer.SizeOfString = (g, s, f) => TextRenderer.MeasureText(g, s, f);
                 m.BackColor = Color.White;
 
                 IProvider p = null;

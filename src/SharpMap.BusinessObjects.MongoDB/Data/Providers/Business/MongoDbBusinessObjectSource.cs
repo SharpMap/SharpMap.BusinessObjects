@@ -20,7 +20,7 @@ using System.Linq;
 using GeoAPI.Geometries;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
+//using MongoDB.Driver.Builders;
 using MongoDB.Driver.GeoJsonObjectModel;
 using SharpMap.Converters;
 
@@ -34,7 +34,7 @@ namespace SharpMap.Data.Providers.Business
     public abstract class MongoDbBusinessObjectSource<T, TCoordinate> : BaseBusinessObjectSource<T>
         where TCoordinate: GeoJsonCoordinates
     {
-        private readonly MongoCollection<T> _collection;
+        private readonly IMongoCollection<T> _collection;
         protected readonly GeoJsonConverter<TCoordinate> Converter;
 
         private MongoDbBusinessObjectSource(GeoJsonConverter<TCoordinate> converter)
@@ -66,7 +66,7 @@ namespace SharpMap.Data.Providers.Business
         private MongoDbBusinessObjectSource(GeoJsonConverter<TCoordinate> converter, MongoClient mongoClient, string database, string collection)
             :this(converter)
         {
-            var mongoDatabase = mongoClient.GetServer().GetDatabase(database);
+            var mongoDatabase = mongoClient.GetDatabase(database);
             _collection = mongoDatabase.GetCollection<T>(collection);
         }
 
@@ -80,15 +80,19 @@ namespace SharpMap.Data.Providers.Business
                 return CachedExtents;
 
             var extent = new Envelope();
-            foreach (var t in _collection.FindAll())
-                extent.ExpandToInclude(GetGeometry(t).EnvelopeInternal);
+            var crsr = _collection.FindSync(Builders<T>.Filter.Empty);
+            while (crsr.MoveNext())
+            {
+                foreach (var itm in crsr.Current)
+                    extent.ExpandToInclude(GetGeometry(itm).EnvelopeInternal);
+            }
             return CachedExtents = extent;
         }
 
         public override IEnumerable<T> Select(Envelope box)
         {
             box = GetExtents().Intersection(box);
-            return _collection.Find(BuildEnvelopeQuery(box));
+            return _collection.Find(BuildEnvelopeQuery(box)).ToEnumerable();
         }
 
         /// <summary>
@@ -96,7 +100,7 @@ namespace SharpMap.Data.Providers.Business
         /// </summary>
         /// <param name="box"></param>
         /// <returns></returns>
-        protected abstract IMongoQuery BuildEnvelopeQuery(Envelope box);
+        protected abstract FilterDefinition<T> BuildEnvelopeQuery(Envelope box);
 
         /// <summary>
         /// Select a set of features based on <paramref name="geom"/>
@@ -117,7 +121,7 @@ namespace SharpMap.Data.Providers.Business
         /// <returns></returns>
         public override T Select(uint id)
         {
-            return _collection.FindOneById(id);
+            return _collection.FindSync(Builders<T>.Filter.Eq(t => GetId(t) == id, true)).FirstOrDefault();
         }
 
         /// <summary>
@@ -128,7 +132,9 @@ namespace SharpMap.Data.Providers.Business
         {
             foreach (var businessObject in businessObjects)
             {
-                _collection.Save(businessObject);
+                uint id = GetId(businessObject);
+                var filter = Builders<T>.Filter.Eq(t => GetId(t), id);
+                _collection.ReplaceOne(filter, businessObject);
             }
         }
 
@@ -140,8 +146,9 @@ namespace SharpMap.Data.Providers.Business
         {
             foreach (var businessObject in businessObjects)
             {
-                var query = Query<T>.EQ(t  => GetId(t), GetId(businessObject));
-                _collection.Remove(query);
+                uint id = GetId(businessObject);
+                var query = Builders<T>.Filter.Eq(t  => GetId(t), id);
+                _collection.DeleteOne(query);
             }
         }
 
@@ -151,7 +158,7 @@ namespace SharpMap.Data.Providers.Business
         /// <param name="businessObjects">The features that need to be inserted</param>
         public override void Insert(IEnumerable<T> businessObjects)
         {
-            _collection.InsertBatch(businessObjects);
+            _collection.InsertMany(businessObjects);
         }
 
         /// <summary>
@@ -159,7 +166,7 @@ namespace SharpMap.Data.Providers.Business
         /// </summary>
         public override int Count
         {
-            get { return (int)_collection.Count(); }
+            get { return (int)_collection.CountDocuments(Builders<T>.Filter.Empty); }
         }
     }
 }

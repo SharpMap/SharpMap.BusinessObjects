@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Data;
+using System.Data.Common;
 using GeoAPI.Geometries;
 using GeoAPI.IO;
 using NetTopologySuite.IO;
 using NHibernate;
+using NHibernate.Engine;
 using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
 
@@ -25,7 +27,7 @@ namespace SharpMap.Business.Tests.NHibernating
             return x.GetHashCode();
         }
 
-        public object NullSafeGet(IDataReader rs, string[] names, object owner)
+        public object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor implementor, object owner)
         {
             var value = rs.GetValue(rs.GetOrdinal(names[0]));
             if (value == DBNull.Value)
@@ -34,10 +36,10 @@ namespace SharpMap.Business.Tests.NHibernating
             return Reader.Read((byte[]) value);
         }
 
-        public void NullSafeSet(IDbCommand cmd, object value, int index)
+        public void NullSafeSet(DbCommand cmd, object value, int index, ISessionImplementor implementor)
         {
             var geom = (IGeometry) value;
-            NHibernateUtil.Binary.NullSafeSet(cmd, Writer.Write(geom), index);
+            NHibernateUtil.Binary.NullSafeSet(cmd, Writer.Write(geom), index, implementor);
         }
 
         public object DeepCopy(object value)

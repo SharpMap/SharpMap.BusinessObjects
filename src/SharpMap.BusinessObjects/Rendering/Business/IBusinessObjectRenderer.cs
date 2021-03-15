@@ -1,4 +1,4 @@
-﻿// Copyright 2014 - Felix Obermaier (www.ivv-aachen.de)
+// Copyright 2014 - Felix Obermaier (www.ivv-aachen.de)
 //
 // This file is part of SharpMap.BusinessObjects.
 // SharpMap.BusinessObjects is free software; you can redistribute it and/or modify
@@ -32,24 +32,24 @@ namespace SharpMap.Rendering.Business
         /// </summary>
         /// <param name="g">The graphics object</param>
         /// <param name="map">The map</param>
-        void StartRendering(Graphics g, Map map);
+        void StartRendering(Graphics g, MapViewport map);
 
         /// <summary>
         /// Method to render each individual business object
         /// </summary>
         /// <param name="businessObject">The business object to render</param>
-        void Render(T businessObject);
+        Rectangle Render(T businessObject);
 
         /// <summary>
         /// Method to finalize rendering of business objects
         /// </summary>
         /// <param name="g">The graphics object</param>
         /// <param name="map">The map</param>
-        void EndRendering(Graphics g, Map map);
+        void EndRendering(Graphics g, MapViewport map);
 
         /// <summary>
         /// Gets or sets a value indicating the transformation that is to be applied on the geometry prior to rendering
         /// </summary>
         Func<IGeometry, IGeometry> Transformation { get; set; }
-    }   
+    }
 }

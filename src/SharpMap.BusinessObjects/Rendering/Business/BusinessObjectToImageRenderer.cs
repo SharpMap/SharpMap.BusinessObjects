@@ -28,18 +28,24 @@ namespace SharpMap.Rendering.Business
         [NonSerialized]
         private Bitmap _image;
 
+        /// <summary>
+        /// A graphics object
+        /// </summary>
         [NonSerialized]
         protected Graphics Graphics;
 
+        /// <summary>
+        /// A map viewport object
+        /// </summary>
         [NonSerialized]
-        protected Map Map;
+        protected MapViewport Map;
 
         /// <summary>
         /// Method to start the rendering of business objects
         /// </summary>
         /// <param name="g">The graphics object</param>
         /// <param name="map">The map</param>
-        public void StartRendering(Graphics g, Map map)
+        public void StartRendering(Graphics g, MapViewport map)
         {
             _image = new Bitmap(map.Size.Width, map.Size.Height, PixelFormat.Format32bppArgb);
             Graphics = Graphics.FromImage(_image);
@@ -57,14 +63,14 @@ namespace SharpMap.Rendering.Business
         /// Method to render each individual business object
         /// </summary>
         /// <param name="businessObject">The business object to render</param>
-        public abstract void Render(T businessObject);
+        public abstract Rectangle Render(T businessObject);
 
         /// <summary>
         /// Method to finalize rendering of business objects
         /// </summary>
         /// <param name="g">The graphics object</param>
         /// <param name="map">The map</param>
-        public void EndRendering(Graphics g, Map map)
+        public void EndRendering(Graphics g, MapViewport map)
         {
             // Blit image to map
             g.DrawImageUnscaled(_image, 0, 0);

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright © 2017 - Felix Obermaier, Ingenieurgruppe IVV GmbH & Co. KG
  * 
  * This file is part of SharpMap.BusinessObjects.MongoDB.Gtfs.
@@ -77,11 +77,11 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
             }
         }
 
-        public static void Import(DirectoryInfo directory)
+        public static async Task Import(DirectoryInfo directory)
         {
             var client = GetClient();
-            client.GetServer().DropDatabase(directory.Name);
-            var database = client.GetServer().GetDatabase(directory.Name);
+            await client.DropDatabaseAsync(directory.Name);
+            var database = client.GetDatabase(directory.Name);
 
             // 
             UintIdGenerator.SetKeyTracker(database.GetCollection<UintIdGenerator.UintKeyTracker>("uintkeys"));
@@ -112,146 +112,162 @@ namespace SharpMap.Data.Providers.Business.MongoDB.Gtfs.Import
         /// </summary>
         /// <param name="db">The mongo database</param>
         /// <param name="fi">The file information</param>
-        private delegate void ImportToMongoDb(MongoDatabase db, FileInfo fi);
+        private delegate Task ImportToMongoDb(IMongoDatabase db, FileInfo fi);
 
-        private static void ImportOptional(object param)
+        private static async Task ImportOptional(object param)
         {
             var paras = (object[])param;
             var fileInfo = (FileInfo[])paras[1];
             if (fileInfo != null && fileInfo.Length > 0)
             {
                 var action = (ImportToMongoDb) paras[2];
-                var database = (MongoDatabase)paras[0];
+                var database = (IMongoDatabase)paras[0];
                 action(database, fileInfo[0]);
             }
         }
 
-        private static void ImportFeedInfo(MongoDatabase database, FileInfo getFeedInfo)
+        private static async Task ImportFeedInfo(IMongoDatabase database, FileInfo getFeedInfo)
         {
             var feedInfo = database.GetCollection<FeedInfo>(getFeedInfo.Name);
-            feedInfo.InsertBatch(Associator<FeedInfo>.Read(new StreamReader(getFeedInfo.OpenRead())));
+            await feedInfo.InsertManyAsync(Associator<FeedInfo>.Read(new StreamReader(getFeedInfo.OpenRead())));
         }
 
-        private static void ImportTransfer(MongoDatabase database, FileInfo getTransfer)
+        private static async Task ImportTransfer(IMongoDatabase database, FileInfo getTransfer)
         {
             var shape = database.GetCollection<Transfer>(getTransfer.Name);
-            shape.InsertBatch(Associator<Transfer>.Read(new StreamReader(getTransfer.OpenRead())));
-            shape.CreateIndex("from_stop_id", "to_stop_id");
+            await shape.InsertManyAsync(Associator<Transfer>.Read(new StreamReader(getTransfer.OpenRead())));
+
+            var bldr = Builders<Transfer>.IndexKeys;
+            await shape.Indexes.CreateOneAsync(new CreateIndexModel<Transfer>(
+                bldr.Combine(bldr.Ascending(t => t.FromStopId),
+                    bldr.Ascending(t => t.ToStopId))));
         }
 
-        private static void ImportFrequency(MongoDatabase database, FileInfo getFrequency)
+        private static async Task ImportFrequency(IMongoDatabase database, FileInfo getFrequency)
         {
             var shape = database.GetCollection<Frequency>(getFrequency.Name);
-            shape.InsertBatch(Associator<Frequency>.Read(new StreamReader(getFrequency.OpenRead())));
-            shape.CreateIndex("trip_id");
+            await shape.InsertManyAsync(Associator<Frequency>.Read(new StreamReader(getFrequency.OpenRead())));
+            await shape.Indexes.CreateOneAsync(new CreateIndexModel<Frequency>(
+                Builders<Frequency>.IndexKeys.Ascending(t => t.TripId)));
         }
 
-        private static void ImportShape(MongoDatabase database, FileInfo getShape)
+        private static async Task ImportShape(IMongoDatabase database, FileInfo getShape)
         {
             var shape = database.GetCollection<Shape>(getShape.Name);
-            shape.InsertBatch(Associator<Shape>.Read(new StreamReader(getShape.OpenRead())));
-            shape.CreateIndex("shape_id", "shape_sequence");
+            await shape.InsertManyAsync(Associator<Shape>.Read(new StreamReader(getShape.OpenRead())));
+            var bldr = Builders<Shape>.IndexKeys;
+            await shape.Indexes.CreateOneAsync(new CreateIndexModel<Shape>(
+                bldr.Combine(bldr.Ascending(t => t.ShapeID),
+                    bldr.Ascending(t => t.ShapePointSequence))));
         }
 
-        private static void ImportFareRule(MongoDatabase database, FileInfo getFareRule)
+        private static async Task ImportFareRule(IMongoDatabase database, FileInfo getFareRule)
         {
-            var fareAttribute = database.GetCollection<FareRule>(getFareRule.Name);
-            fareAttribute.InsertBatch(Associator<FareRule>.Read(new StreamReader(getFareRule.OpenRead())));
-            fareAttribute.CreateIndex("fare_id", "route_id");
+            var fareRule = database.GetCollection<FareRule>(getFareRule.Name);
+            await fareRule.InsertManyAsync(Associator<FareRule>.Read(new StreamReader(getFareRule.OpenRead())));
+            var bldr = Builders<FareRule>.IndexKeys;
+            await fareRule.Indexes.CreateOneAsync(new CreateIndexModel<FareRule>(
+                bldr.Combine(bldr.Ascending(t => t.FareId), bldr.Ascending(t => t.RouteId))));
         }
 
-        private static void ImportFareAttribute(MongoDatabase database, FileInfo getFareAttribute)
+        private static async Task ImportFareAttribute(IMongoDatabase database, FileInfo getFareAttribute)
         {
             var fareAttribute = database.GetCollection<FareAttribute>(getFareAttribute.Name);
-            fareAttribute.InsertBatch(Associator<FareAttribute>.Read(new StreamReader(getFareAttribute.OpenRead())));
-            fareAttribute.CreateIndex("fare_id");
+            await fareAttribute.InsertManyAsync(Associator<FareAttribute>.Read(new StreamReader(getFareAttribute.OpenRead())));
+            await fareAttribute.Indexes.CreateOneAsync(new CreateIndexModel<FareAttribute>(
+                Builders<FareAttribute>.IndexKeys.Ascending(t => t.FareId)));
         }
 
-        private static void ImportCalendarDate(MongoDatabase database, FileInfo getCalenderDate)
+        private static async Task ImportCalendarDate(IMongoDatabase database, FileInfo getCalenderDate)
         {
-            var calendar = database.GetCollection<CalendarDate>("calendar_date");
-            calendar.InsertBatch(Associator<CalendarDate>.Read(new StreamReader(getCalenderDate.OpenRead())));
-            calendar.CreateIndex("service_id");
+            var calendarDate = database.GetCollection<CalendarDate>("calendar_date");
+            await calendarDate.InsertManyAsync(Associator<CalendarDate>.Read(new StreamReader(getCalenderDate.OpenRead())));
+            await calendarDate.Indexes.CreateOneAsync(new CreateIndexModel<CalendarDate>(
+                Builders<CalendarDate>.IndexKeys.Ascending(t => t.ServiceId)));
         }
 
-        private static void ImportCalendar(MongoDatabase database, FileInfo getFile)
+        private static async Task ImportCalendar(IMongoDatabase database, FileInfo getFile)
         {
             var calendar = database.GetCollection<Calendar>("calendar");
-            calendar.InsertBatch(Associator<Calendar>.Read(new StreamReader(getFile.OpenRead())));
-            calendar.CreateIndex("service_id");
+            await calendar.InsertManyAsync(Associator<Calendar>.Read(new StreamReader(getFile.OpenRead())));
+            await calendar.Indexes.CreateOneAsync(new CreateIndexModel<Calendar>(
+                Builders<Calendar>.IndexKeys.Ascending(t => t.ServiceID)));
         }
 
-        private static void ImportStopTimes(object param)
+        private static async Task ImportStopTimes(object param)
         {
             var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
+            var database = (IMongoDatabase)paras[0];
             var fileInfo = (FileInfo)paras[1];
-            ImportStopTimes(database, fileInfo);
+            await ImportStopTimes(database, fileInfo);
         }
-        private static void ImportStopTimes(MongoDatabase database, FileInfo getFile)
+        private static async Task ImportStopTimes(IMongoDatabase database, FileInfo getFile)
         {
             var stopTimes = database.GetCollection<StopTime>("stop_times");
-            stopTimes.InsertBatch(Associator<StopTime>.Read(new StreamReader(getFile.OpenRead())));
-            stopTimes.CreateIndex("trip_id");
-            stopTimes.CreateIndex("trip_id", "stop_id", "stop_sequence");
+            await stopTimes.InsertManyAsync(Associator<StopTime>.Read(new StreamReader(getFile.OpenRead())));
+            var bldr = Builders<StopTime>.IndexKeys;
+            await stopTimes.Indexes.CreateOneAsync(new CreateIndexModel<StopTime>(bldr.Ascending(t => t.TripId)));
+            await stopTimes.Indexes.CreateOneAsync(new CreateIndexModel<StopTime>(bldr.Combine(
+                bldr.Ascending(t => t.TripId), bldr.Ascending(t => t.StopId),
+                bldr.Ascending(t => t.StopSequence))));
         }
 
-        private static void ImportRoute(object param)
+        private static async Task ImportRoute(object param)
         {
             var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
+            var database = (IMongoDatabase)paras[0];
             var fileInfo = (FileInfo)paras[1];
-            ImportRoute(database, fileInfo);
+            await ImportRoute(database, fileInfo);
         }
-        private static void ImportRoute(MongoDatabase database, FileInfo fileInfo)
+        private static async Task ImportRoute(IMongoDatabase database, FileInfo fileInfo)
         {
-            var routes = database.GetCollection("routes");
-            routes.InsertBatch(Associator<Route>.Read(new StreamReader(fileInfo.OpenRead())));
+            var routes = database.GetCollection<Route>("routes");
+            await routes.InsertManyAsync(Associator<Route>.Read(new StreamReader(fileInfo.OpenRead())));
         }
 
-        private static void ImportTrip(object param)
+        private static async Task ImportTrip(object param)
         {
             var paras = (object[])param;
-            var database = (MongoDatabase)paras[0];
+            var database = (IMongoDatabase)paras[0];
             var fileInfo = (FileInfo)paras[1];
-            ImportTrip(database, fileInfo);
+            await ImportTrip(database, fileInfo);
         }
-        private static void ImportTrip(MongoDatabase database, FileInfo fileInfo)
+        private static async Task ImportTrip(IMongoDatabase database, FileInfo fileInfo)
         {
-            var routes = database.GetCollection("trips");
-            routes.InsertBatch(Associator<Trip>.Read(new StreamReader(fileInfo.OpenRead())));
+            var routes = database.GetCollection<Trip>("trips");
+            await routes.InsertManyAsync(Associator<Trip>.Read(new StreamReader(fileInfo.OpenRead())));
         }
 
         public static Regex Csv { get { return new Regex("(?<=^|,)(\"(?:[^\"]|\"\")*\"|[^,]*)"); } }
 
-        private static void ImportStop(object param)
+        private static async Task ImportStop(object param)
         {
             var paras = (object[]) param;
-            var database = (MongoDatabase) paras[0];
+            var database = (IMongoDatabase) paras[0];
             var fileInfo = (FileInfo) paras[1];
-            ImportStop(database,fileInfo);
+            await ImportStop(database,fileInfo);
         }
 
-        private static void ImportStop(MongoDatabase database, FileInfo fileInfo)
+        private static async Task ImportStop(IMongoDatabase database, FileInfo fileInfo)
         {
             var stops = database.GetCollection<Stop>("stops");
-            stops.InsertBatch(Associator<Stop>.Read(new StreamReader(fileInfo.OpenRead())));
-            stops.CreateIndex("StopId");
-            stops.CreateIndex("StopLatLon");
+            await stops.InsertManyAsync(Associator<Stop>.Read(new StreamReader(fileInfo.OpenRead())));
+            await stops.Indexes.CreateOneAsync(new CreateIndexModel<Stop>(Builders<Stop>.IndexKeys.Ascending(t => t.StopId)));
+            await stops.Indexes.CreateOneAsync(new CreateIndexModel<Stop>(Builders<Stop>.IndexKeys.Ascending(t => t.StopLatLon)));
         }
 
-        private static void ImportAgency(object param)
+        private static async Task ImportAgency(object param)
         {
             var paras = (object[]) param;
-            var database = (MongoDatabase)paras[0];
+            var database = (IMongoDatabase)paras[0];
             var fileInfo = (FileInfo)paras[1];
-            ImportAgency(database, fileInfo);
+            await ImportAgency(database, fileInfo);
         }
 
-        private static void ImportAgency(MongoDatabase database, FileInfo fileInfo)
+        private static async Task ImportAgency(IMongoDatabase database, FileInfo fileInfo)
         {
             var agencies = database.GetCollection<Agency>("agency");
-            agencies.InsertBatch(Associator<Agency>.Read(new StreamReader(fileInfo.OpenRead())));
+            await agencies.InsertManyAsync(Associator<Agency>.Read(new StreamReader(fileInfo.OpenRead())));
         }
 
 
