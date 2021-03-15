@@ -4,10 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <Product>SharpMap.BusinessObjects.Tests</Product>
     <RootNamespace>SharpMap.Business.Tests</RootNamespace>
-    <Version>1.2.0</Version>
-    <Authors>SharpMap - Team</Authors>
     <Description>Tests around business objects that should work with SharpMap</Description>
-    <DocumentationFile></DocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -20,10 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj" />
-    <ProjectReference Include="..\SharpMap.BusinessObjects.EF6\SharpMap.BusinessObjects.EF6.csproj" />
-    <ProjectReference Include="..\SharpMap.BusinessObjects.MongoDB\SharpMap.BusinessObjects.MongoDB.csproj" />
-    <ProjectReference Include="..\SharpMap.BusinessObjects.MongoDB.Gtfs\SharpMap.BusinessObjects.MongoDB.Gtfs.csproj" />
+    <ProjectReference Include="..\..\src\SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj" />
+    <ProjectReference Include="..\..\src\SharpMap.BusinessObjects.EF6\SharpMap.BusinessObjects.EF6.csproj" />
+    <ProjectReference Include="..\..\src\SharpMap.BusinessObjects.MongoDB\SharpMap.BusinessObjects.MongoDB.csproj" />
+    <ProjectReference Include="..\..\src\SharpMap.BusinessObjects.MongoDB.Gtfs\SharpMap.BusinessObjects.MongoDB.Gtfs.csproj" />
   </ItemGroup>
 
 </Project>

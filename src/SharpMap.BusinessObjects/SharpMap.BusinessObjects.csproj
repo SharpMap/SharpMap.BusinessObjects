@@ -15,12 +15,4 @@
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <None Include="..\SharpMap.Logo.png">
-    <Pack>True</Pack>
-    </None>
-  </ItemGroup>
-
-
 </Project>

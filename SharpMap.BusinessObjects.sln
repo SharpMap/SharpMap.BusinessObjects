@@ -1,23 +1,23 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects", "SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj", "{AC492306-4594-4E1E-A7B4-8982937061F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects", "src\SharpMap.BusinessObjects\SharpMap.BusinessObjects.csproj", "{AC492306-4594-4E1E-A7B4-8982937061F8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects.EF6", "SharpMap.BusinessObjects.EF6\SharpMap.BusinessObjects.EF6.csproj", "{F2EF6114-B690-45A6-BDAD-4F362EF0BC36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects.EF6", "src\SharpMap.BusinessObjects.EF6\SharpMap.BusinessObjects.EF6.csproj", "{F2EF6114-B690-45A6-BDAD-4F362EF0BC36}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects.MongoDB", "SharpMap.BusinessObjects.MongoDB\SharpMap.BusinessObjects.MongoDB.csproj", "{210F7E37-648C-426B-A0C4-101FDCB28362}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects.MongoDB", "src\SharpMap.BusinessObjects.MongoDB\SharpMap.BusinessObjects.MongoDB.csproj", "{210F7E37-648C-426B-A0C4-101FDCB28362}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects.MongoDB.Gtfs", "SharpMap.BusinessObjects.MongoDB.Gtfs\SharpMap.BusinessObjects.MongoDB.Gtfs.csproj", "{513BE777-DCCE-43A1-A727-F521C570BCFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects.MongoDB.Gtfs", "src\SharpMap.BusinessObjects.MongoDB.Gtfs\SharpMap.BusinessObjects.MongoDB.Gtfs.csproj", "{513BE777-DCCE-43A1-A727-F521C570BCFD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects.Tests", "SharpMap.BusinessObjects.Tests\SharpMap.BusinessObjects.Tests.csproj", "{6BB66868-62EA-49C7-A6F4-06B87E2BDE6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpMap.BusinessObjects.Tests", "test\SharpMap.BusinessObjects.Tests\SharpMap.BusinessObjects.Tests.csproj", "{6BB66868-62EA-49C7-A6F4-06B87E2BDE6D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "General", "General", "{3F947150-250D-4662-AA5D-E970C66C0C7B}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
-		..\LICENSE = ..\LICENSE
-		..\README.md = ..\README.md
+		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global

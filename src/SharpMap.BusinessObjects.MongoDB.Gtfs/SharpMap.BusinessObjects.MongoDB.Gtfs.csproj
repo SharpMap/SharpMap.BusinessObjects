@@ -5,19 +5,10 @@
     <Product>SharpMap.BusinessObjects.MongoDB.Gtfs</Product>
     <PackageTags>SharpMap GIS Map GeoSpatial Business MongoDB Gtfs</PackageTags>
     <RootNamespace>SharpMap.Data.Providers.Business.MongoDB</RootNamespace>
-    <Version>1.2.0</Version>
-    <Authors>SharpMap - Team</Authors>
     <Description>MongoDB business objects to work with SharpMap</Description>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-	  <Pack>false</Pack>
+	<Pack>false</Pack>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\SharpMap.Logo.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.10.0" />

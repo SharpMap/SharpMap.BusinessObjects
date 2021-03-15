@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -10,6 +10,7 @@ using NetTopologySuite.Operation.Buffer;
 using NUnit.Framework;
 using SharpMap.Data.Providers.Business;
 using SharpMap.Layers;
+using SharpMap.Rendering;
 using SharpMap.Rendering.Business;
 
 namespace SharpMap.Business.Tests.Memory
@@ -82,33 +83,36 @@ namespace SharpMap.Business.Tests.Memory
         /// Method to render each individual business object
         /// </summary>
         /// <param name="businessObject">The business object to render</param>
-        public override void Render(LinkWithLoad businessObject)
+        public override Rectangle Render(LinkWithLoad businessObject)
         {
             var g = (ILineString)Transformation(businessObject.LineString);
 
             // Draw the loads in positive direction
-            RenderLoadStrips(g, businessObject.Load[0], Scale);
+            var affectedArea = RenderLoadStrips(g, businessObject.Load[0], Scale);
 
             // Draw the loads in negative direction
-            RenderLoadStrips(g, businessObject.Load[1], -Scale);
+            affectedArea.ExpandToInclude(RenderLoadStrips(g, businessObject.Load[1], -Scale));
 
             // Draw the axis
             if (AxisPen != null)
                 Graphics.DrawLines(AxisPen, businessObject.LineString.TransformToImage(Map));
+
+            return affectedArea;
         }
 
-        private void RenderLoadStrips(ILineString ls, double[] loads, double scale = 1)
+        private Rectangle RenderLoadStrips(ILineString ls, double[] loads, double scale = 1)
         {
             // Get the coordinates
             var start = Simplify 
-                ? NetTopologySuite.Simplify.DouglasPeuckerLineSimplifier.Simplify(ls.Coordinates, 2*Map.PixelSize)
+                ? NetTopologySuite.Simplify.DouglasPeuckerLineSimplifier.Simplify(ls.Coordinates, 2*Map.PixelWidth)
                 : ls.Coordinates;
 
             // Compute the initial offset
             if (Offset != 0d)
                 start = RemoveSelfIntersections(_offsetCurveBuilder
-                    .GetOffsetCurve(start, Math.Sign(scale)*Offset * Map.PixelSize), ls.Factory);
+                    .GetOffsetCurve(start, Math.Sign(scale)*Offset * Map.PixelWidth), ls.Factory);
 
+            var affectedArea = RectangleF.Empty;
             // All strips
             for (var i = 0; i < loads.Length; i++)
             {
@@ -129,21 +133,50 @@ namespace SharpMap.Business.Tests.Memory
 
                 // Transform to image coordinates
                 var gp = ring.TransformToImage(Map);
+                var affectedAreaItem = GetAffectedArea(gp);
 
                 // Draw the polygon
                 Brush b;
                 if (!LoadBrush.TryGetValue(i, out b))
                     b = new HatchBrush(HatchStyle.LargeCheckerBoard, Color.HotPink, Color.Chartreuse);
 
+                
                 Graphics.FillPolygon(b, gp);
 
                 if (FramePen != null)
+                {
                     Graphics.DrawPolygon(FramePen, gp);
+                    affectedAreaItem = RectangleF.Inflate(affectedAreaItem, (int)FramePen.Width, (int)FramePen.Width);
+                }
 
                 start = offset;
+                affectedArea = ExpandToInclude(affectedArea, affectedAreaItem);
             }
+
+            return Rectangle.Round(affectedArea);
         }
 
+        private RectangleF GetAffectedArea(PointF[] points)
+        {
+            var affected = RectangleF.Empty;
+            if (points == null || points.Length == 0)
+                return affected;
+
+            for (int i = 1; i < points.Length; i += 2)
+                affected = ExpandToInclude(affected, new RectangleF(points[i], SizeF.Empty));
+
+            return affected;
+        }
+
+        private RectangleF ExpandToInclude(RectangleF a, RectangleF b)
+        {
+            if (a.IsEmpty)
+                return b;
+            if (b.IsEmpty)
+                return a;
+
+            return RectangleF.Union(a, b);
+        }
         //private ILineString GetOffsetCurve(ILineString lineString)
         //{
         //    return lineString.Factory.CreateLineString(

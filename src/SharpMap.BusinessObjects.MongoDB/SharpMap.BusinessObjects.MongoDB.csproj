@@ -9,13 +9,11 @@
     <Authors>SharpMap - Team</Authors>
     <Description>MongoDB business objects to work with SharpMap</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<Pack>true</Pack>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\SharpMap.Logo.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <None Include="..\..\SharpMap.Logo.png"><Pack>True</Pack></None>
   </ItemGroup>
 
   <ItemGroup>
