@@ -20,7 +20,7 @@ namespace SharpMap.Business.Tests.NHibernating
         public void SetUp()
         {
             GeoAPI.GeometryServiceProvider.Instance = NetTopologySuite.NtsGeometryServices.Instance;
-            var sampleDirectory = Path.Combine(Directory.GetCurrentDirectory(), "TestData");
+            var sampleDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData");
 
             if (!Directory.Exists(sampleDirectory))
                 Directory.CreateDirectory(sampleDirectory);

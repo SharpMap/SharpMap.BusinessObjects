@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data.Entity.Spatial;
 using System.Linq;
 using Common.Logging;
@@ -19,8 +19,8 @@ namespace SharpMap.Business.Tests.EF6
         {
             using (var context = new UniversityContext())
             {
-                var connectionString = context.Database.Connection.ConnectionString;
-                LogManager.GetCurrentClassLogger().Debug(fmh => fmh("Connected with: {0}", connectionString));
+                string connectionString = context.Database.Connection.ConnectionString;
+                LogManager.GetLogger<UniversityTest>().Debug(fmh => fmh("Connected with: {0}", connectionString));
 
                 //Delete old entries
                 var entries = context.Universities.AsEnumerable();
