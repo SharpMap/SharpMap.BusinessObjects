@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Data.Entity.Spatial;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using GeoAPI.Geometries;
@@ -18,25 +19,26 @@ namespace SharpMap.Data.Providers.Business
 
         internal static void Configure()
         {
-            if (!_initialized)
+            if (_initialized)
+                return;
+
+            _initialized = true;
+            try
             {
-                _initialized = true;
-                try
-                {
-                    SqlServerTypes.Utilities.LoadNativeAssemblies(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
-                }
-                catch (Exception ex)
-                {
-                    throw new TypeInitializationException("EF6BusinessObjectSource", ex);
-                }
+                SqlServerTypes.Utilities.LoadNativeAssemblies(
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            }
+            catch (Exception ex)
+            {
+                throw new TypeInitializationException("EF6BusinessObjectSource", ex);
             }
         }
     }
 
     /// <summary>
-    /// A bui
+    /// A business object source dealing with EF6
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The type of the business objects.</typeparam>
     public class EF6BusinessObjectSource<T> : BaseBusinessObjectSource<T>
         where T:class, IEF6SpatialGeometryObject
     {
@@ -48,8 +50,15 @@ namespace SharpMap.Data.Providers.Business
         private readonly Func<DbContext> _createContext;
         private IGeometryFactory _factory;
 
+        /// <summary>
+        /// Gets a value indicating the <see cref="DbContext"/>
+        /// </summary>
         public DbContext Context { get { return _createContext(); } }
 
+        /// <summary>
+        /// Creates an instance of this class using the provided context creation method.
+        /// </summary>
+        /// <param name="createContext">A context creation method</param>
         public EF6BusinessObjectSource(Func<DbContext> createContext)
         {
 
@@ -57,7 +66,7 @@ namespace SharpMap.Data.Providers.Business
         }
 
         /// <summary>
-        /// Gets the entities
+        /// Gets a value indication all the entities
         /// </summary>
         public IDbSet<T> Entities { get { return Context.Set<T>(); } }
 
@@ -77,7 +86,7 @@ namespace SharpMap.Data.Providers.Business
                             using (var c = _createContext())
                             {
                                 var f = c.Set<T>().FirstOrDefault();
-                                var srid = f == null ? 0 : f.DbGeometry.CoordinateSystemId;
+                                int srid = f == null ? 0 : f.DbGeometry.CoordinateSystemId;
                                 _factory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid);
                             }
                         }
