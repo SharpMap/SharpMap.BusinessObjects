@@ -91,10 +91,28 @@ namespace SharpMap.Data.Providers.Business
         public abstract void Delete(IEnumerable<T> businessObjects);
 
         /// <summary>
+        /// Attribute-based deletion according to provided <paramref name="match"/>
+        /// </summary>
+        /// <param name="match"><typeparamref name="Predicate<T>"/> identifying business objects to be deleted</param>
+        public virtual void Delete(Predicate<T> match)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Insert the provided <paramref name="businessObjects"/>
         /// </summary>
         /// <param name="businessObjects">The features that need to be inserted</param>
         public abstract void Insert(IEnumerable<T> businessObjects);
+
+        /// <summary>
+        /// Insert provided <paramref name="businessObject"/> and expand extents
+        /// </summary>
+        /// <param name="businessObject">The business object to be inserted</param>
+        public virtual void Insert(T businessObject)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Method to get the geometry of a specific feature
@@ -135,6 +153,35 @@ namespace SharpMap.Data.Providers.Business
             if (CachedExtents == null)
                 throw new InvalidOperationException("You need to set Cached before using this function or override GetExtents");
             return CachedExtents;
+        }
+
+        /// <summary>
+        /// Attribute-based selection according to <paramref name="match"/>
+        /// </summary>
+        /// <param name="match">The predicate</param>
+        /// <returns>The the first business object matching the predicate</returns>
+        public virtual T Find(Predicate<T> match)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Attribute-based selection according to <paramref name="match"/>
+        /// </summary>
+        /// <param name="match">The predicate</param>
+        /// <returns>An array of business objects matching the predicate</returns>
+        public virtual T[] FindAll(Predicate<T> match)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// The business objects contained by the Source
+        /// </summary>
+        /// <returns>A shallow copy of the business objects</returns>
+        public virtual T[] AsReadOnly()
+        {
+            throw new NotImplementedException();
         }
     }
 }

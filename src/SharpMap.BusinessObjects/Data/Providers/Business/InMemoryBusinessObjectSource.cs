@@ -55,6 +55,18 @@ namespace SharpMap.Data.Providers.Business
         {
             get { return _title; }
         }
+        ///// <summary>
+        ///// Collection of business objects for querying using Select(IQueryable<T> query)
+        ///// or to directly edit attributes of one or more objects
+        /////</summary>
+        //public ICollection<T> Context
+        //{
+        //    get
+        //    {
+        //        lock (((ICollection)_businessObjects).SyncRoot)
+        //            return _businessObjects.Values;
+        //    }
+        //}
 
         /// <summary>
         /// Select a set of features based on <paramref name="box"/>
@@ -139,6 +151,48 @@ namespace SharpMap.Data.Providers.Business
         }
 
         /// <summary>
+        /// Attribute-based deletion according to provided <paramref name="match"/>
+        /// </summary>
+        /// <param name="match"><typeparamref name="Predicate<T>"/> identifying business objects to be deleted</param>
+        public override void Delete(Predicate<T> match)
+        {
+            lock (((ICollection)_businessObjects).SyncRoot)
+            {
+                foreach (T bo in FindAll(match))
+                {
+                    _businessObjects.Remove(_getId(bo));
+                }
+                CachedExtents = null;
+            }
+        }
+
+        /// <summary>
+        /// Delete objects by provided <paramref name="oids"/>
+        /// </summary>
+        /// <param name="oids">ObjectIds of features to be deleted</param>
+        public void Delete(IEnumerable<uint> oids)
+        {
+            lock (((ICollection)_businessObjects).SyncRoot)
+            {
+                foreach (uint oid in oids)
+                {
+                    _businessObjects.Remove(oid);
+                }
+                CachedExtents = null;
+            }
+        }
+
+        public void Clear()
+        {
+            lock (((ICollection)_businessObjects).SyncRoot)
+            {
+                _businessObjects.Clear();
+                CachedExtents = null;
+            }
+
+        }
+
+        /// <summary>
         /// Insert the provided <paramref name="features"/>
         /// </summary>
         /// <param name="features">The features that need to be inserted</param>
@@ -154,20 +208,30 @@ namespace SharpMap.Data.Providers.Business
             }
         }
 
-        public void InsertFeature(T feature)
+        /// <summary>
+        /// Insert provided <paramref name="businessObject"/> and expand extents
+        /// </summary>
+        /// <param name="businessObject">The business object to be inserted</param>
+        public override void Insert(T businessObject)
         {
             lock (((ICollection)_businessObjects).SyncRoot)
             {
-                _businessObjects.Add(_getId(feature), feature);
+                _businessObjects.Add(_getId(businessObject), businessObject);
 
                 // expand to include
                 var res = CachedExtents ?? new Envelope();
 
-                var g = _getGeometry(feature);
+                var g = _getGeometry(businessObject);
                 if (g != null && !g.IsEmpty)
                     res.ExpandToInclude(g.EnvelopeInternal);
                 CachedExtents = res;
             }
+        }
+
+        [Obsolete("Use Insert(T businessObject)")]
+        public void InsertFeature(T feature)
+        {
+            Insert(feature);
         }
 
         public override int Count
@@ -197,6 +261,54 @@ namespace SharpMap.Data.Providers.Business
                 }
                 return res;
             }
+        }
+
+        /// <summary>
+        /// Attribute-based selection according to <paramref name="match"/>
+        /// </summary>
+        /// <param name="match">The predicate</param>
+        /// <returns>The the first business object matching the predicate</returns>
+        public override T[] FindAll(Predicate<T> match)
+        {
+            T[] objList;
+            lock (((ICollection)_businessObjects).SyncRoot)
+            {
+                objList = new T[_businessObjects.Count];
+                _businessObjects.Values.CopyTo(objList, 0);
+            }
+            return Array.FindAll(objList, match);
+        }
+
+        /// <summary>
+        /// Attribute-based selection according to <paramref name="match"/>
+        /// </summary>
+        /// <param name="match">The predicate</param>
+        /// <returns>The the first business object matching the predicate</returns>
+        public override T Find(Predicate<T> match)
+        {
+            T[] objList;
+            lock (((ICollection)_businessObjects).SyncRoot)
+            {
+                objList = new T[_businessObjects.Count];
+                _businessObjects.Values.CopyTo(objList, 0);
+            }
+            return Array.Find(objList, match);
+        }
+
+        /// <summary>
+        /// The business objects contained by the Source
+        /// </summary>
+        /// <returns>A shallow copy of the business objects</returns>
+        public override T[] AsReadOnly()
+        {
+            T[] objList;
+            lock (((ICollection)_businessObjects).SyncRoot)
+            {
+                objList = new T[_businessObjects.Count];
+                _businessObjects.Values.CopyTo(objList, 0);
+            }
+            return objList;
+
         }
     }
 }
