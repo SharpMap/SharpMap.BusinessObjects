@@ -1,4 +1,4 @@
-﻿// Copyright 2013-2014 - Felix Obermaier (www.ivv-aachen.de)
+// Copyright 2013-2014 - Felix Obermaier (www.ivv-aachen.de)
 //
 // This file is part of SharpMap.BusinessObjects.
 // SharpMap.BusinessObjects is free software; you can redistribute it and/or modify
