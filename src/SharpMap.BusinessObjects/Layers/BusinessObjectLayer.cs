@@ -244,7 +244,7 @@ namespace SharpMap.Layers
                 }
             }
 
-            base.Render(g, map);
+            OnLayerRendered(g);
         }
 
         /// <summary>
