@@ -1,4 +1,4 @@
-﻿// Copyright 2014 - Felix Obermaier (www.ivv-aachen.de)
+// Copyright 2014 - Felix Obermaier (www.ivv-aachen.de)
 //
 // This file is part of SharpMap.BusinessObjects.
 // SharpMap.BusinessObjects is free software; you can redistribute it and/or modify
@@ -55,8 +55,13 @@ namespace SharpMap.Data.Providers.Business
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TFeature"></typeparam>
     [Serializable]
-    public class BusinessObjectProvider<TFeature> : BusinessObjectFilterProvider, IProvider
+    public class BusinessObjectProvider<TFeature>
+        : IProvider
     {
 
         [NonSerialized]
@@ -86,7 +91,7 @@ namespace SharpMap.Data.Providers.Business
         {
             foreach (var tuple in GetPublicMembers(typeof(TFeature)))
             {
-                var memberName = tuple.Item1;
+                string memberName = tuple.Item1;
                 var attributes = tuple.Item2;
                 if (attributes.Ignore) continue;
 
@@ -154,16 +159,22 @@ namespace SharpMap.Data.Providers.Business
             SchemaTable.TableName = featureSource.Title;
         }
 
+        /// <summary>
+        /// Dispose this provider
+        /// </summary>
         public void Dispose()
         {
-            if (_source is IDisposable)
-                ((IDisposable)_source).Dispose();
+            if (_source is IDisposable disposable)
+                disposable.Dispose();
         }
 
+        /// <inheritdoc />
         public string ConnectionID { get; private set; }
 
+        /// <inheritdoc />
         public bool IsOpen { get; private set; }
 
+        /// <inheritdoc />
         public int SRID { get; set; }
 
         /// <summary>
@@ -171,32 +182,40 @@ namespace SharpMap.Data.Providers.Business
         /// </summary>
         public IBusinessObjectSource<TFeature> Source { get { return _source; } }
 
+        private static bool NoConstraint(TFeature feature) => true;
+
+        /// <summary>
+        /// Gets or sets a value indicating a predicate to feature 
+        /// </summary>
+        public Predicate<TFeature> FilterDelegate { get; set; }
+
+        /// <inheritdoc />
         public Collection<IGeometry> GetGeometriesInView(Envelope bbox)
         {
             var res = new Collection<IGeometry>();
-            foreach (TFeature feature in _source.Select(bbox))
+            var match = FilterDelegate ?? NoConstraint;
+            foreach (var feature in _source.Select(bbox))
             {
-                if (FilterDelegate == null || FilterDelegate(feature))
-                {
+                if (match(feature))
                     res.Add(_source.GetGeometry(feature));
-                }
             }
             return res;
         }
 
+        /// <inheritdoc />
         public Collection<uint> GetObjectIDsInView(Envelope bbox)
         {
             var res = new Collection<uint>();
-            foreach (TFeature feature in _source.Select(bbox))
+            var match = FilterDelegate ?? NoConstraint;
+            foreach (var feature in _source.Select(bbox))
             {
-                if (FilterDelegate == null || FilterDelegate(feature))
-                {
+                if (match(feature))
                     res.Add(_source.GetId(feature));
-                }
             }
             return res;
         }
 
+        /// <inheritdoc />
         public IGeometry GetGeometryByID(uint oid)
         {
             var f = _source.Select(oid);
@@ -205,14 +224,15 @@ namespace SharpMap.Data.Providers.Business
             return null;
         }
 
+        /// <inheritdoc />
         public void ExecuteIntersectionQuery(IGeometry geom, FeatureDataSet ds)
         {
             var resTable = (FeatureDataTable)SchemaTable.Copy();
             resTable.BeginLoadData();
+            var match = FilterDelegate ?? NoConstraint;
             foreach (var feature in _source.Select(geom))
             {
-                if (FilterDelegate == null || FilterDelegate(feature))
-                {
+                if (match(feature)) {
                     var fdr = (FeatureDataRow)resTable.LoadDataRow(ToItemArray(feature), LoadOption.OverwriteChanges);
                     fdr.Geometry = _source.GetGeometry(feature);
                 }
@@ -221,6 +241,7 @@ namespace SharpMap.Data.Providers.Business
             ds.Tables.Add(resTable);
         }
 
+        /// <inheritdoc />
         public void ExecuteIntersectionQuery(Envelope box, FeatureDataSet ds)
         {
             var resTable = (FeatureDataTable)SchemaTable.Copy();
@@ -238,29 +259,11 @@ namespace SharpMap.Data.Providers.Business
             ds.Tables.Add(resTable);
         }
 
-        //private static FeatureDataTable Copy(FeatureDataTable schemaTable)
-        //{
-        //    var res = new FeatureDataTable();
-        //    res.TableName = schemaTable.TableName;
-        //    foreach (DataColumn dc in schemaTable.Columns)
-        //    {
-        //        var ndc = res.Columns.Add(dc.ColumnName, dc.DataType);
-        //        ndc.AllowDBNull = dc.AllowDBNull;
-        //        ndc.AutoIncrement = dc.AutoIncrement;
-        //        ndc.AutoIncrementSeed = dc.AutoIncrementSeed;
-        //        ndc.AutoIncrementStep = dc.AutoIncrementStep;
-        //        ndc.Caption = dc.Caption;
-        //        ndc.ColumnMapping = dc.ColumnMapping;
-        //        ndc.DateTimeMode = dc.DateTimeMode;
-        //        ndc.DefaultValue = dc.DefaultValue;
-        //        ndc.MaxLength = dc.MaxLength;
-        //        //ndc.Ordinal = dc.Ordinal;
-        //        ndc.ReadOnly = dc.ReadOnly;
-        //        ndc.Unique = dc.Unique;
-        //    }
-        //    return res;
-        //}
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="ds"></param>
         public void ExecuteQueryable(IQueryable<TFeature> query, FeatureDataSet ds)
         {
             var resTable = (FeatureDataTable)SchemaTable.Copy();
@@ -274,14 +277,16 @@ namespace SharpMap.Data.Providers.Business
             ds.Tables.Add(resTable);
         }
 
+        /// <inheritdoc />
         public int GetFeatureCount()
         {
             return _source.Count;
         }
 
+        /// <inheritdoc />
         public FeatureDataRow GetFeature(uint rowId)
         {
-            var fdr = (FeatureDataRow)SchemaTable.NewRow();
+            var fdr = SchemaTable.NewRow();
             var f = _source.Select(rowId);
             fdr.ItemArray = ToItemArray(f);
             fdr.Geometry = _source.GetGeometry(f);
@@ -290,24 +295,26 @@ namespace SharpMap.Data.Providers.Business
 
         private static object[] ToItemArray(TFeature feature)
         {
-            var items = new List<object>();
-            foreach (var d in GetDelegates)
-            {
-                items.Add(d(feature));
-            }
-            return items.ToArray();
+            var items = new object[GetDelegates.Count];
+            for (int i = 0; i < GetDelegates.Count; i++)
+                items[i] = GetDelegates[i](feature);
+            
+            return items;
         }
 
+        /// <inheritdoc />
         public Envelope GetExtents()
         {
             return _source.GetExtents();
         }
 
+        /// <inheritdoc />
         public void Open()
         {
             IsOpen = true;
         }
 
+        /// <inheritdoc />
         public void Close()
         {
             IsOpen = false;

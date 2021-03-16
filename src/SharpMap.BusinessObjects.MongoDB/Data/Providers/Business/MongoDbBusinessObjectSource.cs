@@ -15,8 +15,10 @@
 // along with SharpMap; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using GeoAPI.Geometries;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -114,6 +116,12 @@ namespace SharpMap.Data.Providers.Business
             return candidates.Where(candidate => p.Intersects(GetGeometry(candidate)));
         }
 
+        /// <inheritdoc />
+        public override IEnumerable<T> Select(Predicate<T> match)
+        {
+            return _collection.AsQueryable().Where(u => match(u));
+        }
+
         /// <summary>
         /// Select a business object by its id
         /// </summary>
@@ -138,6 +146,7 @@ namespace SharpMap.Data.Providers.Business
             }
         }
 
+
         /// <summary>
         /// Delete the provided <paramref name="businessObjects"/>
         /// </summary>
@@ -150,6 +159,22 @@ namespace SharpMap.Data.Providers.Business
                 var query = Builders<T>.Filter.Eq(t  => GetId(t), id);
                 _collection.DeleteOne(query);
             }
+        }
+
+        public override void Delete(Predicate<T> match)
+        {
+            var items = _collection.AsQueryable().Where(u => match(u)).Select(t => GetId(t));
+            var filter = Builders<T>.Filter.In(t => GetId(t), items);
+            _collection.DeleteMany(filter);
+        }
+
+        /// <summary>
+        /// Insert the provided <paramref name="businessObject"/>
+        /// </summary>
+        /// <param name="businessObject">The features that need to be inserted</param>
+        public override void Insert(T businessObject)
+        {
+            _collection.InsertOne(businessObject);
         }
 
         /// <summary>

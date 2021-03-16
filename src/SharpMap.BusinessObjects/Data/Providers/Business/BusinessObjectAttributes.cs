@@ -1,4 +1,4 @@
-﻿// Copyright 2014 - Felix Obermaier (www.ivv-aachen.de)
+// Copyright 2014 - Felix Obermaier (www.ivv-aachen.de)
 //
 // This file is part of SharpMap.BusinessObjects.
 // SharpMap.BusinessObjects is free software; you can redistribute it and/or modify
@@ -24,11 +24,17 @@ namespace SharpMap.Data.Providers.Business
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     public class BusinessObjectIdentifierAttribute : BusinessObjectAttributeAttribute
     {
+        /// <summary>
+        /// Creates an instance of this class setting <see cref="BusinessObjectAttributeAttribute.OrdinalValue"/> to <c>0</c>.
+        /// </summary>
         public BusinessObjectIdentifierAttribute()
         {
             OrdinalValue = 0;
         }
 
+        /// <summary>
+        /// Gets a value indicating if this column/property is unique within the set.
+        /// </summary>
         public override bool IsUnique { get { return true; } set { throw new NotSupportedException(); } }
     }
 
@@ -46,6 +52,9 @@ namespace SharpMap.Data.Providers.Business
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false)]
     public class BusinessObjectAttributeAttribute : Attribute
     {
+        /// <summary>
+        /// Gets a value indicating the position in the array of properties
+        /// </summary>
         protected int OrdinalValue = 9999;
         
         /// <summary>

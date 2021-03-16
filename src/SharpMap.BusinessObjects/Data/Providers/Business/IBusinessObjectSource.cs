@@ -1,4 +1,4 @@
-﻿// Copyright 2013 - 2014 Felix Obermaier (www.ivv-aachen.de)
+// Copyright 2013 - 2014 Felix Obermaier (www.ivv-aachen.de)
 //
 // This file is part of SharpMap.Data.Providers.Business.
 // SharpMap.Data.Providers.Business is free software; you can redistribute it and/or modify
@@ -48,6 +48,13 @@ namespace SharpMap.Data.Providers.Business
         IEnumerable<T> Select(IGeometry geom);
 
         /// <summary>
+        /// Select a set of features based on <paramref name="match"/>
+        /// </summary>
+        /// <param name="match">A predicate</param>
+        /// <returns>A series of business objects</returns>
+        IEnumerable<T> Select(Predicate<T> match);
+
+        /// <summary>
         /// Select a set of features based on <paramref name="query"/>
         /// </summary>
         /// <param name="query">A query</param>
@@ -76,7 +83,7 @@ namespace SharpMap.Data.Providers.Business
         /// <summary>
         /// Attribute-based deletion according to provided <paramref name="match"/>
         /// </summary>
-        /// <param name="match"><typeparamref name="Predicate<T>"/> identifying business objects to be deleted</param>
+        /// <param name="match">A <typeparamref name="T"/> identifying business objects to be deleted</param>
         void Delete(Predicate<T> match);
 
         /// <summary>
@@ -104,7 +111,7 @@ namespace SharpMap.Data.Providers.Business
         /// <param name="businessObject">The business object</param>
         /// <returns>The id</returns>
         uint GetId(T businessObject);
-        
+
         /// <summary>
         /// Gets the number of business objects in the store
         /// </summary>

@@ -28,10 +28,10 @@ namespace SharpMap.Data.Providers.Business
     /// <typeparam name="T">The type of the business object</typeparam>
     public abstract class BaseBusinessObjectSource<T> : IBusinessObjectSource<T>
     {
-// ReSharper disable InconsistentNaming
-        protected static readonly TypeUtility<T>.MemberGetDelegate<uint> _getId;
-        protected static TypeUtility<T>.MemberGetDelegate<IGeometry> _getGeometry;
-// ReSharper restore InconsistentNaming
+        // ReSharper disable once InconsistentNaming
+        private static readonly TypeUtility<T>.MemberGetDelegate<uint> _getId;
+        private static readonly TypeUtility<T>.MemberGetDelegate<IGeometry> _getGeometry;
+        // ReSharper restore InconsistentNaming
 
         /// <summary>
         /// Static constructor
@@ -60,6 +60,13 @@ namespace SharpMap.Data.Providers.Business
         /// <param name="geom">A geometry</param>
         /// <returns></returns>
         public abstract IEnumerable<T> Select(IGeometry geom);
+
+        /// <summary>
+        /// Select a set of features based on <paramref name="match"/>
+        /// </summary>
+        /// <param name="match">A predicate function</param>
+        /// <returns></returns>
+        public abstract IEnumerable<T> Select(Predicate<T> match);
 
         /// <summary>
         /// Select a set of features based on <paramref name="query"/>
@@ -93,11 +100,8 @@ namespace SharpMap.Data.Providers.Business
         /// <summary>
         /// Attribute-based deletion according to provided <paramref name="match"/>
         /// </summary>
-        /// <param name="match"><typeparamref name="Predicate<T>"/> identifying business objects to be deleted</param>
-        public virtual void Delete(Predicate<T> match)
-        {
-            throw new NotImplementedException();
-        }
+        /// <param name="match"><typeparamref name="T"/> identifying business objects to be deleted</param>
+        public virtual void Delete(Predicate<T> match) => Delete(Select(match));
 
         /// <summary>
         /// Insert the provided <paramref name="businessObjects"/>
@@ -109,10 +113,7 @@ namespace SharpMap.Data.Providers.Business
         /// Insert provided <paramref name="businessObject"/> and expand extents
         /// </summary>
         /// <param name="businessObject">The business object to be inserted</param>
-        public virtual void Insert(T businessObject)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void Insert(T businessObject);
 
         /// <summary>
         /// Method to get the geometry of a specific feature
@@ -162,7 +163,7 @@ namespace SharpMap.Data.Providers.Business
         /// <returns>The the first business object matching the predicate</returns>
         public virtual T Find(Predicate<T> match)
         {
-            throw new NotImplementedException();
+            return FindAll(match).FirstOrDefault();
         }
 
         /// <summary>
@@ -172,7 +173,7 @@ namespace SharpMap.Data.Providers.Business
         /// <returns>An array of business objects matching the predicate</returns>
         public virtual T[] FindAll(Predicate<T> match)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         /// <summary>

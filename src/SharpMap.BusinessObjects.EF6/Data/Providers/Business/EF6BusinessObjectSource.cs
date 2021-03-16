@@ -97,12 +97,14 @@ namespace SharpMap.Data.Providers.Business
             set { _factory = value; }
         }
 
+        /// <inheritdoc />
         public override IEnumerable<T> Select(Envelope box)
         {
             var envGeom = Factory.ToGeometry(box);
             return Select(envGeom);
         }
 
+        /// <inheritdoc />
         public override IEnumerable<T> Select(IGeometry geom)
         {
             var dbGeometry = geom.ToDbGeometry();
@@ -117,6 +119,29 @@ namespace SharpMap.Data.Providers.Business
             
         }
 
+        /// <inheritdoc />
+        public override IEnumerable<T> Select(Predicate<T> match)
+        {
+            using (var c = Context)
+            {
+                var qry = from u in c.Set<T>()
+                    where match(u)
+                    select u;
+                return Select(qry);
+            }
+        }
+
+        /// <inheritdoc />
+        public override T Select(uint id)
+        {
+            using (var c = Context)
+            {
+                return c.Set<T>().Find((int)id);
+            }
+        }
+
+
+        /// <inheritdoc />
         public override Envelope GetExtents()
         {
             if (CachedExtents == null)
@@ -142,14 +167,7 @@ namespace SharpMap.Data.Providers.Business
             return res;
         }
 
-        public override T Select(uint id)
-        {
-            using (var c = Context)
-            {
-                return c.Set<T>().Find((int)id);
-            }
-        }
-
+        /// <inheritdoc />
         public override void Update(IEnumerable<T> businessObjects)
         {
             using (var c = Context)
@@ -159,6 +177,7 @@ namespace SharpMap.Data.Providers.Business
             }
         }
 
+        /// <inheritdoc />
         public override void Delete(IEnumerable<T> businessObjects)
         {
             using (var c = Context)
@@ -168,6 +187,23 @@ namespace SharpMap.Data.Providers.Business
             }
         }
 
+        /// <inheritdoc />
+        public override void Delete(Predicate<T> match)
+        {
+            Delete(Select(match));
+        }
+
+        /// <inheritdoc />
+        public override void Insert(T businessObject)
+        {
+            using (var c = Context)
+            {
+                c.Set<T>().Add(businessObject);
+                c.SaveChanges();
+            }
+        }
+
+        /// <inheritdoc />
         public override void Insert(IEnumerable<T> businessObjects)
         {
             using (var c = Context)
@@ -177,6 +213,7 @@ namespace SharpMap.Data.Providers.Business
             }
         }
 
+        /// <inheritdoc />
         public override int Count
         {
             get

@@ -39,7 +39,6 @@ namespace SharpMap.Layers
         
         private IBusinessObjectSource<T> _source;
         private IBusinessObjectRenderer<T> _businessObjectRenderer;
-        private IGeometryFactory _targetFactory;
 
         [NonSerialized]
         private IProvider _provider;
@@ -136,27 +135,6 @@ namespace SharpMap.Layers
             Logger.Info(fmh => fmh("Renderer changed: {0}", _businessObjectRenderer != null ? _businessObjectRenderer.GetType().Name : "null"));
 
             RendererChanged?.Invoke(this, e);
-        }
-
-        /// <inheritdoc />
-        public override ICoordinateTransformation CoordinateTransformation
-        {
-            get
-            {
-                return base.CoordinateTransformation;
-            }
-            set
-            {
-                if (value == CoordinateTransformation)
-                    return;
-
-                if (value == null)
-                    _targetFactory = null;
-                else
-                    GeoAPI.GeometryServiceProvider.Instance.CreateGeometryFactory(Convert.ToInt32(value.TargetCS.AuthorityCode));
-
-                base.CoordinateTransformation = value;
-            }
         }
 
         /// <summary>
@@ -306,55 +284,6 @@ namespace SharpMap.Layers
         /// </summary>
         public bool IsQueryEnabled { get; set; }
 
-#if !SharpMap_v1_2
-        protected Envelope ToTarget(Envelope envelope)
-        {
-            if (CoordinateTransformation == null)
-                return envelope;
-#if !DotSpatialProjections
-            return GeometryTransform.TransformBox(envelope, CoordinateTransformation.MathTransform);
-#else
-            return GeometryTransform.TransformBox(box, CoordinateTransformation.Source, CoordinateTransformation.Target);
-#endif
-        }
-
-        protected IGeometry ToTarget(IGeometry geometry)
-        {
-            if (CoordinateTransformation == null)
-                return geometry;
-#if !DotSpatialProjections
-            return GeometryTransform.TransformGeometry(geometry, CoordinateTransformation.MathTransform, geometry.Factory);
-#else
-            return GeometryTransform.TransformGeometry(geometry, CoordinateTransformation.Source, CoordinateTransformation.Target, targetFactory);
-#endif
-        }
-
-        protected Envelope ToSource(Envelope envelope)
-        {
-            if (ReverseCoordinateTransformation == null)
-            {
-                if (CoordinateTransformation == null)
-                    return envelope;
-
-                var mt = CoordinateTransformation.MathTransform;
-#if !DotSpatialProjections
-                mt.Invert();
-                var res = GeometryTransform.TransformBox(envelope, mt);
-                mt.Invert();
-#else
-                return GeometryTransform.TransformBox(envelope, CoordinateTransformation.Target, CoordinateTransformation.Source);
-#endif
-                return res;
-            }
-
-#if !DotSpatialProjections
-            return GeometryTransform.TransformBox(envelope, ReverseCoordinateTransformation.MathTransform);
-#else
-            return GeometryTransform.TransformBox(box, ReverseCoordinateTransformation.Source, ReverseCoordinateTransformation.Target);
-#endif
-        }
-#endif
-        
         /// <summary>
         /// Method to set <see cref="Provider"/> after deserialization
         /// </summary>

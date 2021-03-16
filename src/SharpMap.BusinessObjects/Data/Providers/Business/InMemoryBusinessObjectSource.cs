@@ -1,4 +1,4 @@
-﻿// Copyright 2013 - 2014 Felix Obermaier (www.ivv-aachen.de)
+// Copyright 2013 - 2014 Felix Obermaier (www.ivv-aachen.de)
 //
 // This file is part of SharpMap.Data.Providers.Business.
 // SharpMap.Data.Providers.Business is free software; you can redistribute it and/or modify
@@ -16,10 +16,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using GeoAPI.Geometries;
-using NetTopologySuite.Geometries;
 using System.Collections;
+using NetTopologySuite;
 
 namespace SharpMap.Data.Providers.Business
 {
@@ -32,6 +33,7 @@ namespace SharpMap.Data.Providers.Business
         private readonly Dictionary<uint, T> _businessObjects;
 
         private readonly string _title;
+        private IGeometryFactory _factory;
 
         /// <summary>
         /// Creates an instance of this class
@@ -55,18 +57,6 @@ namespace SharpMap.Data.Providers.Business
         {
             get { return _title; }
         }
-        ///// <summary>
-        ///// Collection of business objects for querying using Select(IQueryable<T> query)
-        ///// or to directly edit attributes of one or more objects
-        /////</summary>
-        //public ICollection<T> Context
-        //{
-        //    get
-        //    {
-        //        lock (((ICollection)_businessObjects).SyncRoot)
-        //            return _businessObjects.Values;
-        //    }
-        //}
 
         /// <summary>
         /// Select a set of features based on <paramref name="box"/>
@@ -75,7 +65,7 @@ namespace SharpMap.Data.Providers.Business
         /// <returns></returns>
         public override IEnumerable<T> Select(Envelope box)
         {
-            return Select(new GeometryFactory().ToGeometry(box));
+            return Select((_factory ?? NtsGeometryServices.Instance.CreateGeometryFactory()).ToGeometry(box));
         }
 
         /// <summary>
@@ -91,13 +81,26 @@ namespace SharpMap.Data.Providers.Business
             {
                 foreach (T value in _businessObjects.Values)
                 {
-                    var g = _getGeometry(value);
+                    var g = GetGeometry(value);
                     if (g != null && prep.Intersects(g))
                     {
                         yield return value;
                     }
                 }
             }
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<T> Select(Predicate<T> match)
+        {
+            if (_businessObjects == null)
+                return Array.Empty<T>();
+
+            var res = new List<T>();
+            lock (((ICollection)_businessObjects).SyncRoot)
+                res.AddRange(_businessObjects?.Values.Where(u => match(u)));
+
+            return res;
         }
 
         /// <summary>
@@ -108,10 +111,9 @@ namespace SharpMap.Data.Providers.Business
         /// <exception cref="ArgumentException"></exception>
         public override T Select(uint id)
         {
-            T res;
             lock (((ICollection)_businessObjects).SyncRoot)
             {
-                if (_businessObjects.TryGetValue(id, out res))
+                if (_businessObjects.TryGetValue(id, out var res))
                     return res;
             }
             throw new ArgumentException("No feature with this id", id.ToString());
@@ -127,9 +129,9 @@ namespace SharpMap.Data.Providers.Business
 
             lock (((ICollection)_businessObjects).SyncRoot)
             {
-                foreach (T feature in features)
+                foreach (var feature in features)
                 {
-                    _businessObjects.Add(_getId(feature), feature);
+                    _businessObjects.Add(GetId(feature), feature);
                 }
             }
         }
@@ -142,9 +144,9 @@ namespace SharpMap.Data.Providers.Business
         {
             lock (((ICollection)_businessObjects).SyncRoot)
             {
-                foreach (T feature in features)
+                foreach (var feature in features)
                 {
-                    _businessObjects.Remove(_getId(feature));
+                    _businessObjects.Remove(GetId(feature));
                 }
                 CachedExtents = null;
             }
@@ -153,14 +155,14 @@ namespace SharpMap.Data.Providers.Business
         /// <summary>
         /// Attribute-based deletion according to provided <paramref name="match"/>
         /// </summary>
-        /// <param name="match"><typeparamref name="Predicate<T>"/> identifying business objects to be deleted</param>
+        /// <param name="match"><typeparamref name="T"/> identifying business objects to be deleted</param>
         public override void Delete(Predicate<T> match)
         {
             lock (((ICollection)_businessObjects).SyncRoot)
             {
-                foreach (T bo in FindAll(match))
+                foreach (var bo in FindAll(match))
                 {
-                    _businessObjects.Remove(_getId(bo));
+                    _businessObjects.Remove(GetId(bo) );
                 }
                 CachedExtents = null;
             }
@@ -182,6 +184,9 @@ namespace SharpMap.Data.Providers.Business
             }
         }
 
+        /// <summary>
+        /// Clears the cache
+        /// </summary>
         public void Clear()
         {
             lock (((ICollection)_businessObjects).SyncRoot)
@@ -200,9 +205,12 @@ namespace SharpMap.Data.Providers.Business
         {
             lock (((ICollection)_businessObjects).SyncRoot)
             {
-                foreach (T feature in features)
+                foreach (var feature in features)
                 {
-                    _businessObjects.Add(_getId(feature), feature);
+                    if (_factory == null)
+                        _factory = GetGeometry(feature).Factory;
+
+                    _businessObjects.Add(GetId(feature), feature);
                 }
                 CachedExtents = null;
             }
@@ -216,24 +224,19 @@ namespace SharpMap.Data.Providers.Business
         {
             lock (((ICollection)_businessObjects).SyncRoot)
             {
-                _businessObjects.Add(_getId(businessObject), businessObject);
+                _businessObjects.Add(GetId(businessObject), businessObject);
 
                 // expand to include
                 var res = CachedExtents ?? new Envelope();
 
-                var g = _getGeometry(businessObject);
+                var g = GetGeometry(businessObject);
                 if (g != null && !g.IsEmpty)
                     res.ExpandToInclude(g.EnvelopeInternal);
                 CachedExtents = res;
             }
         }
 
-        [Obsolete("Use Insert(T businessObject)")]
-        public void InsertFeature(T feature)
-        {
-            Insert(feature);
-        }
-
+        /// <inheritdoc />
         public override int Count
         {
             get
@@ -243,6 +246,7 @@ namespace SharpMap.Data.Providers.Business
             }
         }
 
+        /// <inheritdoc />
         public override Envelope GetExtents()
         {
             return CachedExtents ?? (CachedExtents = ComputeExtents());
@@ -255,7 +259,7 @@ namespace SharpMap.Data.Providers.Business
                 var res = new Envelope();
                 foreach (var bo in _businessObjects.Values)
                 {
-                    var g = _getGeometry(bo);
+                    var g = GetGeometry(bo);
                     if (g != null && !g.IsEmpty)
                         res.ExpandToInclude(g.EnvelopeInternal);
                 }

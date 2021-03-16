@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using GeoAPI.Geometries;
 using NHibernate;
 using NHibernate.Criterion;
+using NHibernate.Loader;
 using SharpMap.Data.Providers.Business;
 
 namespace SharpMap.Business.Tests.NHibernating
@@ -31,7 +34,7 @@ namespace SharpMap.Business.Tests.NHibernating
             {
                 foreach (var bo in session.CreateCriteria<T>().List<T>())
                 {
-                    if (box.Intersects(_getGeometry(bo).EnvelopeInternal))
+                    if (box.Intersects(GetGeometry(bo).EnvelopeInternal))
                         yield return bo;
                 }
             }
@@ -45,9 +48,19 @@ namespace SharpMap.Business.Tests.NHibernating
             {
                 foreach (var bo in session.CreateCriteria<T>().List<T>())
                 {
-                    if (p.Intersects(_getGeometry(bo)))
+                    if (p.Intersects(GetGeometry(bo)))
                         yield return bo;
                 }
+            }
+        }
+
+        public override IEnumerable<T> Select(Predicate<T> match)
+        {
+            using (var session = GetSession())
+            {
+                
+                foreach (var bo in session.CreateCriteria<T>().List<T>().Where(u => match(u)))
+                        yield return bo;
             }
         }
 
@@ -82,6 +95,14 @@ namespace SharpMap.Business.Tests.NHibernating
                     session.Delete(businessObject);
                 }
                 t.Commit();
+            }
+        }
+
+        public override void Insert(T businessObject)
+        {
+            using (var session = GetSession())
+            {
+                session.SaveOrUpdate(businessObject);
             }
         }
 
@@ -121,7 +142,7 @@ namespace SharpMap.Business.Tests.NHibernating
                 {
                     foreach (var bo in session.CreateCriteria<T>().List<T>())
                     {
-                        _cached.ExpandToInclude(_getGeometry(bo).EnvelopeInternal);
+                        _cached.ExpandToInclude(GetGeometry(bo).EnvelopeInternal);
                     }
                 }
             }

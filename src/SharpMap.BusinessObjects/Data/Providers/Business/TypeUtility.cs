@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright © 2013 - Felix Obermaier, Ingenieurgruppe IVV GmbH & Co. KG
  * 
  * This file is part of SharpMap.BusinessObjects.
@@ -27,13 +27,17 @@ using System.Reflection.Emit;
 
 namespace SharpMap.Data.Providers.Business
 {
-    public class TypeUtility<TObjectType>
+    /// <summary>
+    /// A utility class to help with feature objects
+    /// </summary>
+    /// <typeparam name="TObjectType"></typeparam>
+    internal static class TypeUtility<TObjectType>
     {
         public delegate TMemberType MemberGetDelegate<out TMemberType>(TObjectType obj);
 
-        internal delegate object MemberGetDelegate(TObjectType obj);
+        public delegate object MemberGetDelegate(TObjectType obj);
 
-        internal static MemberGetDelegate<TMemberType> GetMemberGetDelegate<TMemberType>(string memberName)
+        public static MemberGetDelegate<TMemberType> GetMemberGetDelegate<TMemberType>(string memberName)
         {
             var objectType = typeof(TObjectType);
             
@@ -52,7 +56,7 @@ namespace SharpMap.Data.Providers.Business
                     return (MemberGetDelegate<TMemberType>)
                         Delegate.CreateDelegate(typeof(MemberGetDelegate<TMemberType>), mi);
                 }
-                throw new Exception(String.Format(
+                throw new Exception(string.Format(
                     "Property: '{0}' of Type: '{1}' does" +
                     " not have a Public Get accessor",
                     memberName, objectType.Name));
@@ -117,7 +121,7 @@ namespace SharpMap.Data.Providers.Business
         }
     }
 
-    internal class TypeUtility
+    internal static class TypeUtility
     {
         public static Type GetMemberType(Type objectType, string memberName)
         {
